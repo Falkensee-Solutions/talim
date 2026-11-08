@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "audio": {
+    "sha256": "3bb46495b14ee645cc8269bf970e36c35ec3d10d6d9812eb3372cc0f06b7afef",
+    "duration": 46.174375
+  },
+  "detector": {
+    "tool": "ffmpeg silencedetect",
+    "thresholdDb": -42,
+    "minimumSeconds": 0.2,
+    "guardSeconds": 0.08
+  },
+  "silences": [
+    {
+      "start": 0.08,
+      "end": 0.66712
+    },
+    {
+      "start": 6.019501,
+      "end": 6.619365
+    },
+    {
+      "start": 14.177188,
+      "end": 14.998549
+    },
+    {
+      "start": 27.688526,
+      "end": 28.546757000000003
+    },
+    {
+      "start": 37.174104,
+      "end": 38.139138
+    },
+    {
+      "start": 42.960045,
+      "end": 43.257642000000004
+    },
+    {
+      "start": 45.285669,
+      "end": 46.078367
+    }
+  ],
+  "rawLog": "[in#0/mp3 @ 0xa2ac1c000] Estimating duration from bitrate, this may be inaccurate\nInput #0, mp3, from '105.mp3':\n  Metadata:\n    genre           : Other\n    album           : www.islamway.com - www.ilamtv.com\n    artist          : القارئ فاتح جولاك- Qari Fatih Cholak\n    Engineer        : القارئ فاتح جولاك- Qari Fatih Cholak\n    title           : 105 - Al-Fil ( The Elephant ) سورة الفيل\n    copyright       : www.islamway.com - www.ilamtv.com\n    date            : 2014\n  Duration: 00:00:46.17, start: 0.000000, bitrate: 64 kb/s\n  Stream #0:0: Audio: mp3 (mp3float), 22050 Hz, stereo, fltp, 64 kb/s\nStream mapping:\n  Stream #0:0 -> #0:0 (mp3 (mp3float) -> pcm_s16le (native))\nPress [q] to stop, [?] for help\nOutput #0, null, to 'pipe:':\n  Metadata:\n    genre           : Other\n    album           : www.islamway.com - www.ilamtv.com\n    artist          : القارئ فاتح جولاك- Qari Fatih Cholak\n    Engineer        : القارئ فاتح جولاك- Qari Fatih Cholak\n    title           : 105 - Al-Fil ( The Elephant ) سورة الفيل\n    copyright       : www.islamway.com - www.ilamtv.com\n    date            : 2014\n    encoder         : Lavf63.1.102\n  Stream #0:0: Audio: pcm_s16le, 22050 Hz, stereo, s16, 705 kb/s\n    Metadata:\n      encoder         : Lavc63.1.102 pcm_s16le\n[Parsed_silencedetect_0 @ 0xa2b008e40] silence_start: 0\n[Parsed_silencedetect_0 @ 0xa2b008e40] silence_end: 0.74712 | silence_duration: 0.74712\n[Parsed_silencedetect_0 @ 0xa2b008e40] silence_start: 5.939501\n[Parsed_silencedetect_0 @ 0xa2b008e40] silence_end: 6.699365 | silence_duration: 0.759864\n[Parsed_silencedetect_0 @ 0xa2b008e40] silence_start: 14.097188\n[Parsed_silencedetect_0 @ 0xa2b008e40] silence_end: 15.078549 | silence_duration: 0.981361\n[Parsed_silencedetect_0 @ 0xa2b008e40] silence_start: 27.608526\n[Parsed_silencedetect_0 @ 0xa2b008e40] silence_end: 28.626757 | silence_duration: 1.018231\n[Parsed_silencedetect_0 @ 0xa2b008e40] silence_start: 37.094104\n[Parsed_silencedetect_0 @ 0xa2b008e40] silence_end: 38.219138 | silence_duration: 1.125034\n[Parsed_silencedetect_0 @ 0xa2b008e40] silence_start: 42.880045\n[Parsed_silencedetect_0 @ 0xa2b008e40] silence_end: 43.337642 | silence_duration: 0.457596\n[Parsed_silencedetect_0 @ 0xa2b008e40] silence_start: 45.205669\n[Parsed_silencedetect_0 @ 0xa2b008e40] silence_end: 46.158367 | silence_duration: 0.952698\n[out#0/null @ 0xa2b0086c0] video:0KiB audio:3976KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown\nsize=N/A time=00:00:46.15 bitrate=N/A speed=2.33e+03x elapsed=0:00:00.01    \n"
+}

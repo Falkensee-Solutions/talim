@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "audio": {
+    "sha256": "6b51479e98e38b0bd7a830dd42d1b367094883083106b44827700f3f4c45a489",
+    "duration": 99.160813
+  },
+  "detector": {
+    "tool": "ffmpeg silencedetect",
+    "thresholdDb": -42,
+    "minimumSeconds": 0.2,
+    "guardSeconds": 0.08
+  },
+  "silences": [
+    {
+      "start": 0.08,
+      "end": 0.43403600000000003
+    },
+    {
+      "start": 5.882313,
+      "end": 9.035964
+    },
+    {
+      "start": 14.253764,
+      "end": 19.849320000000002
+    },
+    {
+      "start": 28.002857,
+      "end": 30.088821000000003
+    },
+    {
+      "start": 36.673991,
+      "end": 39.774354
+    },
+    {
+      "start": 46.239456,
+      "end": 49.03322
+    },
+    {
+      "start": 58.794807,
+      "end": 58.849909000000004
+    },
+    {
+      "start": 59.015896,
+      "end": 61.554739000000005
+    },
+    {
+      "start": 70.031995,
+      "end": 74.112494
+    },
+    {
+      "start": 96.136916,
+      "end": 99.080813
+    }
+  ],
+  "rawLog": "[in#0/mp3 @ 0x928c1c000] Estimating duration from bitrate, this may be inaccurate\nInput #0, mp3, from '001_2.mp3':\n  Metadata:\n    title           : Surat Al-Fatiha\n    artist          : AbdulBaset AbdulSamad [Mujawwad]\n    album           : Quran\n    genre           : Quran\n    track           : 1/114\n    comment         : quranicaudio.com\n  Duration: 00:01:39.16, start: 0.000000, bitrate: 128 kb/s\n  Stream #0:0: Audio: mp3 (mp3float), 44100 Hz, stereo, fltp, 128 kb/s\n  Stream #0:1: Video: png, rgb24(pc, gbr/unknown/unknown), 231x124, 90k tbr, 90k tbn (attached pic)\n    Metadata:\n      comment         : Cover (front)\nStream mapping:\n  Stream #0:1 -> #0:0 (png (native) -> wrapped_avframe (native))\n  Stream #0:0 -> #0:1 (mp3 (mp3float) -> pcm_s16le (native))\nPress [q] to stop, [?] for help\nOutput #0, null, to 'pipe:':\n  Metadata:\n    title           : Surat Al-Fatiha\n    artist          : AbdulBaset AbdulSamad [Mujawwad]\n    album           : Quran\n    genre           : Quran\n    track           : 1/114\n    comment         : quranicaudio.com\n    encoder         : Lavf63.1.102\n  Stream #0:0: Video: wrapped_avframe, rgb24(pc, gbr/unknown/unknown, progressive), 231x124, q=2-31, 200 kb/s, 90k fps, 90k tbn (attached pic)\n    Metadata:\n      encoder         : Lavc63.1.102 wrapped_avframe\n      comment         : Cover (front)\n  Stream #0:1: Audio: pcm_s16le, 44100 Hz, stereo, s16, 1411 kb/s\n    Metadata:\n      encoder         : Lavc63.1.102 pcm_s16le\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_start: 0\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_end: 0.514036 | silence_duration: 0.514036\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_start: 5.802313\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_end: 9.115964 | silence_duration: 3.313651\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_start: 14.173764\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_end: 19.92932 | silence_duration: 5.755556\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_start: 27.922857\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_end: 30.168821 | silence_duration: 2.245964\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_start: 36.593991\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_end: 39.854354 | silence_duration: 3.260363\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_start: 46.159456\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_end: 49.11322 | silence_duration: 2.953764\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_start: 58.714807\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_end: 58.929909 | silence_duration: 0.215102\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_start: 58.935896\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_end: 61.634739 | silence_duration: 2.698844\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_start: 69.951995\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_end: 74.192494 | silence_duration: 4.240499\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_start: 96.056916\n[Parsed_silencedetect_0 @ 0x9290095c0] silence_end: 99.160816 | silence_duration: 3.1039\n[out#0/null @ 0x929008900] video:0KiB audio:17082KiB subtitle:0KiB other streams:0KiB global headers:0KiB muxing overhead: unknown\nframe=    1 fps=0.0 q=-0.0 Lsize=N/A time=00:01:39.16 bitrate=N/A speed=1.44e+03x elapsed=0:00:00.06    \n"
+}
