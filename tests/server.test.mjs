@@ -21,7 +21,9 @@ test('serves app and seekable audio without exposing arbitrary files', async t =
   assert.equal(page.status, 200);
   const html = await page.text();
   assert.match(html, /Fatiha/);
-  assert.match(html, /id="open-display-settings"/);
+  assert.match(html, /<header class="topbar">[\s\S]*id="open-display-settings"[\s\S]*<\/header>/);
+  assert.equal((html.match(/id="open-display-settings"/g) || []).length, 1);
+  assert.doesNotMatch(html.match(/<div class="player">[\s\S]*?<\/section>/)?.[0] || '', /id="open-display-settings"/);
   assert.match(html, /id="display-settings"/);
   assert.match(html, /id="toggle-reading" type="checkbox"/);
   assert.match(html, /id="word-preview" type="checkbox"/);
@@ -32,10 +34,17 @@ test('serves app and seekable audio without exposing arbitrary files', async t =
   assert.match(html, /<dialog id="editor"/);
   assert.doesNotMatch(html, /word-preview-note|player-tip-text|preview-details|class="intro"|id="alignment-note"/);
   assert.match(html, /<h1 class="lesson-title">Fatiha Suresi<\/h1>/);
+  const font = await fetch(`${base}/TalimQuran.ttf`);
+  assert.equal(font.status, 200);
+  assert.equal(font.headers.get('content-type'), 'font/ttf');
+  assert.equal((await font.arrayBuffer()).byteLength, (await stat(new URL('../TalimQuran.ttf', import.meta.url))).size);
+  assert.match(await (await fetch(`${base}/Amiri-OFL.txt`)).text(), /SIL OPEN FONT LICENSE/);
+  assert.match(html, /rel="preload" href="\.\/TalimQuran.ttf" as="font"/);
   const preview = await fetch(`${base}/word-preview.json`);
   assert.equal(preview.status, 200);
   assert.equal((await preview.json()).words.length, 34);
   assert.equal((await fetch(`${base}/word-preview.mjs`)).status, 200);
+  assert.equal((await fetch(`${base}/tajweed-timing.mjs`)).status, 200);
   assert.equal((await fetch(`${base}/verse-playback.mjs`)).status, 200);
   assert.equal((await fetch(`${base}/study-groups.mjs`)).status, 200);
   const silence = await fetch(`${base}/preview-silence.json`);

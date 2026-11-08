@@ -1,4 +1,5 @@
 import { letters, sections, alignmentUnits } from './fatiha.mjs';
+import { weightedUnitBoundaries } from './tajweed-timing.mjs';
 
 export function validateWordPreview(document, audio) {
   if (document?.version !== 1 || document.alignment !== 'word-candidates-v1'
@@ -23,7 +24,7 @@ export function validateWordPreview(document, audio) {
     end = word.end;
     const units = alignmentUnits.filter(unit => unit.verse === word.section && `${unit.verse}:${unit.word}` === word.id);
     if (!units.length) throw new Error('Kelime için hareke grubu bulunamadı.');
-    return { ...word, units };
+    return { ...word, units, visualBoundaries: weightedUnitBoundaries(units) };
   });
 }
 
@@ -100,7 +101,9 @@ export function wordPreviewAt(time, words, silences = []) {
   const duration = audibleDuration(word.start, word.end, silences);
   if (duration <= 0) return null;
   const progress = Math.min(1, audibleDuration(word.start, time, silences) / duration);
-  const position = Math.min(progress * word.units.length, word.units.length - 1e-9);
-  const index = Math.min(Math.floor(position), word.units.length - 1);
-  return { word, letter: word.units[index], fraction: position - index };
+  const boundaries = word.visualBoundaries || Array.from({ length: word.units.length + 1 }, (_, index) => index / word.units.length);
+  let index = boundaries.findIndex((end, i) => i > 0 && progress < end) - 1;
+  if (index < 0) index = word.units.length - 1;
+  const fraction = Math.min(1 - 1e-9, (progress - boundaries[index]) / (boundaries[index + 1] - boundaries[index]));
+  return { word, letter: word.units[index], fraction };
 }

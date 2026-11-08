@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#176b62">
   <title>Talim · Fatiha’yı birlikte öğrenelim</title>
+  <link rel="preload" href="./TalimQuran.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./waveform.css">
   <link rel="stylesheet" href="./hold-timing.css">
@@ -14,7 +15,10 @@
 <body>
   <header class="topbar">
     <a class="brand" href="./"><span class="brand-icon" aria-hidden="true">✦</span> talim <span class="brand-note">dinle · söyle · öğren</span></a>
-    <button id="open-editor" class="quiet" hidden>⚙ <span>Büyükler için</span></button>
+    <div class="topbar-actions">
+      <button id="open-editor" class="quiet" hidden>⚙ <span>Büyükler için</span></button>
+      <button id="open-display-settings" class="secondary" aria-haspopup="dialog" aria-label="Görünüm ayarları" title="Görünüm ayarları"><span aria-hidden="true">⚙</span><span>Ayarlar</span></button>
+    </div>
   </header>
   <main>
     <section class="lesson" aria-label="Fatiha öğrenme alanı">
@@ -45,7 +49,6 @@
           <button id="repeat-verse" class="secondary" disabled><span aria-hidden="true">↺</span><span>Ayeti tekrar et</span></button>
           <button id="next" class="secondary" disabled><span aria-hidden="true">→</span><span>Sonraki</span></button>
           <button id="stop-playback" class="secondary"><span aria-hidden="true">■</span><span>Durdur</span></button>
-          <button id="open-display-settings" class="secondary" aria-haspopup="dialog" aria-label="Görünüm ayarları" title="Görünüm ayarları"><span aria-hidden="true">⚙</span><span>Ayarlar</span></button>
         </div>
       </div>
     </section>

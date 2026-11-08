@@ -55,16 +55,11 @@ for (const verse of sections) {
   const row = document.createElement('section');
   row.className = 'verse';
   row.setAttribute('aria-label', sectionLabel(verse.id));
-  const number = document.createElement('span');
-  number.className = 'verse-number';
-  number.textContent = verse.id || '✦';
-  number.setAttribute('aria-hidden', 'true');
   const arabic = document.createElement('p');
   arabic.className = 'arabic';
   arabic.lang = 'ar';
   arabic.dir = 'rtl';
   arabic.textContent = displayArabic(verse.arabic);
-  if (verse.id > 0) arabic.append(number);
   const reading = document.createElement('p');
   reading.className = 'reading';
   reading.textContent = verse.id === 0 ? `${verse.reading.replace(/\.$/, '')} (ayet değildir).` : verse.reading;
@@ -75,7 +70,7 @@ for (const verse of sections) {
   const choice = document.createElement('button');
   choice.className = 'verse-choice';
   choice.type = 'button';
-  choice.textContent = verse.id || '✦';
+  choice.textContent = verse.id || 'ا';
   choice.setAttribute('aria-label', `${sectionLabel(verse.id)} seç`);
   choice.setAttribute('aria-pressed', String(selectedMemoryVerses.has(verse.id)));
   choice.disabled = true;
@@ -273,7 +268,7 @@ function updateVerseSelection() {
     chip.className = `verse-chip${chosen ? ' is-selected' : ''}`;
     chip.dataset.verse = verse.id; chip.setAttribute('aria-hidden', 'true');
     chip.title = `${sectionLabel(verse.id)} · ${chosen ? 'Seçili' : 'Seçili değil'}`;
-    chip.textContent = verse.id || '✦';
+    chip.textContent = verse.id || 'ا';
     if (chosen) { const check = document.createElement('small'); check.textContent = '✓'; chip.append(check); }
     summary.append(chip);
   }

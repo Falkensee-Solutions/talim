@@ -8,8 +8,9 @@ import { validateTimingDocument } from '../timing.mjs';
 const root = fileURLToPath(new URL('../', import.meta.url));
 export const staticAssets = [
   'index.html', 'style.css', 'waveform.css', 'hold-timing.css', 'memorization.css',
-  'app.mjs', 'fatiha.mjs', 'timing.mjs', 'word-preview.mjs', 'verse-playback.mjs',
+  'app.mjs', 'fatiha.mjs', 'timing.mjs', 'word-preview.mjs', 'tajweed-timing.mjs', 'verse-playback.mjs',
   'study-groups.mjs', 'memorization.mjs', 'waveform.mjs', 'hold-timing.mjs', '001.mp3',
+  'TalimQuran.ttf', 'Amiri-OFL.txt',
 ];
 
 export async function buildStatic(output = join(root, 'dist')) {
