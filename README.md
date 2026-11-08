@@ -50,7 +50,10 @@ Yerel adres: `http://127.0.0.1:4173/`. Statik web çıktısı `dist/` klasörün
 Yalnızca uygulamanın gereken dosyaları ve hazır zamanlamalar çıktıya alınır;
 model çağrısı veya yeni ses işleme yapılmaz.
 
-GitHub Pages, GitHub Actions iş akışıyla yayımlanır. Pages sürümü salt okunurdur:
+GitHub Pages, GitHub Actions iş akışıyla yayımlanır. İş akışı Ubuntu 24.04'e
+sabitlenmiştir; `checkout@v6` ve `setup-node@v6` Node.js 24 eylem çalışma zamanını
+kullanır. Projenin test/build adımları için seçilen Node.js sürümü 22 olarak korunur.
+Pages sürümü salt okunurdur:
 Node API sunucusu, anahtarlar, sanal ortam ve yerel ASR/diagnostik yanıtları
 web sitesine dahil edilmez. Ses, statik yayında tarayıcı içi Blob üzerinden çalınır;
 böylece sunucunun byte-range desteğinden bağımsız olarak seçilen ayete geçilebilir.
