@@ -306,7 +306,6 @@ function refreshSegments() {
   segments = audioInfo ? selectedVerseRanges(previewWords, [...selectedMemoryVerses], audioInfo.duration).map(range => ({ ...range, title: `${sectionLabel(range.verse)} · Seçili ayetler${chosenPlayback?.repeat ? ' · Sürekli tekrar' : ''}` })) : [];
   segmentIndex = Math.min(segmentIndex, Math.max(0, segments.length - 1));
   document.querySelectorAll('[data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
-  $('segment-title').textContent = segments[segmentIndex]?.title || 'Ses yükleniyor…';
   $('listen').disabled = !segments.length;
   $('repeat').disabled = !segments.length;
   $('repeat-verse').disabled = !segments.length;
@@ -479,7 +478,6 @@ $('repeat-verse').addEventListener('click', () => {
   if (range) {
     chosenPlayback = null;
     refreshSegments();
-    $('segment-title').textContent = `${sectionLabel(verse)} · Ayeti tekrar et`;
     void playRange(range.start, range.end, true);
   }
 });
@@ -654,7 +652,6 @@ function renderMemorySession() {
       ? `${label} · Hoca 1 defa okuyor`
       : `${label} · Şimdi sıra sende · ${step.repetition}/${memorySession.repetitions}. tekrar`;
   $('memory-session').classList.toggle('child-turn', step.role === 'child' && !memorySession.finished && !memorySession.inGap);
-  $('segment-title').textContent = `${label} · ${verseIndex + 1}/${teachers.length} bölüm`;
   $('previous').disabled = verseIndex === 0;
   $('next').disabled = !memorySession.waitingNext;
   $('memory-next').hidden = !memorySession.waitingNext;

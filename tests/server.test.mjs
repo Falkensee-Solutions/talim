@@ -21,10 +21,18 @@ test('serves app and seekable audio without exposing arbitrary files', async t =
   assert.equal(page.status, 200);
   const html = await page.text();
   assert.match(html, /Fatiha/);
+  assert.doesNotMatch(html, /[✦✧📖]/u);
+  assert.equal((html.match(/<svg class="book-icon"/g) || []).length, 3);
+  assert.equal((html.match(/fill="none" stroke="currentColor"/g) || []).length, 3);
   assert.match(html, /<header class="topbar">[\s\S]*id="open-display-settings"[\s\S]*<\/header>/);
   assert.equal((html.match(/id="open-display-settings"/g) || []).length, 1);
   assert.doesNotMatch(html.match(/<div class="player">[\s\S]*?<\/section>/)?.[0] || '', /id="open-display-settings"/);
   assert.match(html, /id="display-settings"/);
+  assert.match(html, /id="phase" class="sr-only" role="status"/);
+  assert.doesNotMatch(html, /parent-note|<footer|Talim · Fatiha başlangıç dersi|Hazırsan başlayalım!/);
+  const settings = html.match(/<dialog id="display-settings"[\s\S]*?<\/dialog>/)?.[0] || '';
+  assert.match(settings, /https:\/\/acikkuran\.com\/fatiha-suresi\.md/);
+  assert.match(settings, /CC BY-NC-SA 4\.0/);
   assert.match(html, /id="toggle-reading" type="checkbox"/);
   assert.match(html, /id="word-preview" type="checkbox"/);
   assert.match(html, /class="talim-visual"/);
@@ -32,7 +40,7 @@ test('serves app and seekable audio without exposing arbitrary files', async t =
   assert.match(html, /id="open-editor" class="quiet" hidden/);
   assert.match(html, /id="repeat-gap"[^>]*hidden/);
   assert.match(html, /<dialog id="editor"/);
-  assert.doesNotMatch(html, /word-preview-note|player-tip-text|preview-details|class="intro"|id="alignment-note"/);
+  assert.doesNotMatch(html, /word-preview-note|player-tip-text|preview-details|class="intro"|id="alignment-note"|selection-help|reading-heading|segment-title/);
   assert.match(html, /<h1 class="lesson-title">Fatiha Suresi<\/h1>/);
   const font = await fetch(`${base}/TalimQuran.ttf`);
   assert.equal(font.status, 200);

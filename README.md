@@ -6,8 +6,10 @@
 - Tam, ayet ayet, orta adımlar ve kelime kelime çalışma.
 - Hoca bir kez okur; öğrenci 1, 3, 5 veya 7 kez sessiz tekrar eder.
 - Tekrarlar arasında 5 saniye hazırlık süresi; öğrenci turunda görsel takip.
-- Sağ üstteki görünüm ayarları: Türkçe okunuş ve takip işareti.
+- Sağ üstteki görünüm ayarları: Türkçe okunuş, takip işareti ve kaynak/lisans bilgisi.
+- Alt açıklama ve footer gösterilmez; oynatma durumu yalnızca ekran okuyuculara duyurulur.
 - Ayet numaraları yalnızca yandaki seçim düğmelerinde gösterilir; Eûzü başlangıcı elif (ا) ile işaretlenir.
+- Ayet alanları düz köşelidir; solda seçim çizgisi yoktur. Alanlar arasında ortalanmış, %90 genişliğinde ince bir alt çizgi bulunur; son alanın altında çizgi gösterilmez.
 - Arapça metin yerel Talim Quran yazı tipiyle gösterilir: harekeler ve şedde kırmızı, durak işaretleri mor. Harf birleşimleri ve üst üste gelen harekeler yazı tipinin Kur’an dizgisiyle yerleştirilir; metin ve ses eşleşme konumları değiştirilmez.
 
 ### Arapça yazı tipi
