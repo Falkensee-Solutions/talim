@@ -1,0 +1,199 @@
+{
+  "version": 1,
+  "alignment": "haraka-groups-v1",
+  "audio": {
+    "sha256": "49e7eb357c18613d483bbc1838ab51c5dcfe6bb6d6161c69c2a68cb710a9576f",
+    "duration": 54.220125
+  },
+  "timings": [
+    {
+      "id": "0:0",
+      "start": 0.818487,
+      "end": 0.854433,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "0:2",
+      "start": 0.978342,
+      "end": 1.018831,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "0:5",
+      "start": 1.187033,
+      "end": 1.232058,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "0:8",
+      "start": 1.632908,
+      "end": 1.677695,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "0:12",
+      "start": 2.081145,
+      "end": 2.127551,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "0:15",
+      "start": 2.557442,
+      "end": 2.596898,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "0:18",
+      "start": 2.96266,
+      "end": 3.025665,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "0:20",
+      "start": 3.23454,
+      "end": 3.277776,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "0:25",
+      "start": 3.506313,
+      "end": 3.555515,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "0:28",
+      "start": 3.78958,
+      "end": 3.839744,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "0:30",
+      "start": 4.361347,
+      "end": 4.396509,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "0:33",
+      "start": 4.760143,
+      "end": 4.81352,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "0:38",
+      "start": 5.173882,
+      "end": 5.210175,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "0:41",
+      "start": 5.618039,
+      "end": 5.672643,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "0:44",
+      "start": 6.063463,
+      "end": 6.108308,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "1:0",
+      "start": 7.510021,
+      "end": 7.554568,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "1:2",
+      "start": 7.816482,
+      "end": 7.847776,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "1:4",
+      "start": 8.031105,
+      "end": 8.051874,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "1:9",
+      "start": 8.221726,
+      "end": 8.457017,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "1:12",
+      "start": 8.763671,
+      "end": 8.986476,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "1:17",
+      "start": 9.158242,
+      "end": 9.546391,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "1:20",
+      "start": 9.546391,
+      "end": 9.88089,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "1:22",
+      "start": 9.88089,
+      "end": 10.228077,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "1:24",
+      "start": 10.228077,
+      "end": 10.560883,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "1:29",
+      "start": 10.560883,
+      "end": 10.864511,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "1:32",
+      "start": 10.864511,
+      "end": 11.410764,
+      "reviewed": true,
+      "silent": false
+    },
+    {
+      "id": "1:35",
+      "start": 11.410764,
+      "end": 11.862292,
+      "reviewed": true,
+      "silent": false
+    }
+  ]
+}

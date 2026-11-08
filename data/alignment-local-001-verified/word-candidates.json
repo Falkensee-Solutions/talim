@@ -1,0 +1,597 @@
+{
+  "version": 1,
+  "alignment": "word-candidates-v1",
+  "audio": {
+    "sha256": "49e7eb357c18613d483bbc1838ab51c5dcfe6bb6d6161c69c2a68cb710a9576f",
+    "duration": 54.204125,
+    "excerpt": {
+      "start": 0,
+      "end": 54.204125
+    }
+  },
+  "strategy": "whole-excerpt-known-reference",
+  "referenceSource": {
+    "url": "https://acikkuran.com/fatiha-suresi.md",
+    "license": "CC BY-NC-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/4.0/deed.tr",
+    "retrieved": "2026-11-08"
+  },
+  "words": [
+    {
+      "id": "0:0",
+      "section": 0,
+      "text": "أَعُوذُ",
+      "letterIds": [
+        "0:0",
+        "0:2",
+        "0:4",
+        "0:5"
+      ],
+      "start": 0.56,
+      "end": 1.421,
+      "acousticScore": 0.9,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "0:1",
+      "section": 0,
+      "text": "بِاللّٰهِ",
+      "letterIds": [
+        "0:8",
+        "0:10",
+        "0:11",
+        "0:12",
+        "0:15"
+      ],
+      "start": 1.541,
+      "end": 2.721,
+      "acousticScore": 0.868,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "0:2",
+      "section": 0,
+      "text": "مِنَ",
+      "letterIds": [
+        "0:18",
+        "0:20"
+      ],
+      "start": 2.841,
+      "end": 3.201,
+      "acousticScore": 0.778,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "0:3",
+      "section": 0,
+      "text": "الشَّيْطَانِ",
+      "letterIds": [
+        "0:23",
+        "0:24",
+        "0:25",
+        "0:28",
+        "0:30",
+        "0:32",
+        "0:33"
+      ],
+      "start": 3.241,
+      "end": 4.842,
+      "acousticScore": 0.843,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "0:4",
+      "section": 0,
+      "text": "الرَّجِيمِ",
+      "letterIds": [
+        "0:36",
+        "0:37",
+        "0:38",
+        "0:41",
+        "0:43",
+        "0:44"
+      ],
+      "start": 4.882,
+      "end": 7.243,
+      "acousticScore": 0.868,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "1:0",
+      "section": 1,
+      "text": "بِسْمِ",
+      "letterIds": [
+        "1:0",
+        "1:2",
+        "1:4"
+      ],
+      "start": 7.363,
+      "end": 7.984,
+      "acousticScore": 0.833,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "1:1",
+      "section": 1,
+      "text": "اللّٰهِ",
+      "letterIds": [
+        "1:7",
+        "1:8",
+        "1:9",
+        "1:12"
+      ],
+      "start": 8.144,
+      "end": 8.984,
+      "acousticScore": 0.768,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "1:2",
+      "section": 1,
+      "text": "الرَّحْمٰنِ",
+      "letterIds": [
+        "1:15",
+        "1:16",
+        "1:17",
+        "1:20",
+        "1:22",
+        "1:24"
+      ],
+      "start": 9.044,
+      "end": 10.665,
+      "acousticScore": 0.86,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "1:3",
+      "section": 1,
+      "text": "الرَّح۪يمِ",
+      "letterIds": [
+        "1:27",
+        "1:28",
+        "1:29",
+        "1:32",
+        "1:34",
+        "1:35"
+      ],
+      "start": 10.705,
+      "end": 12.706,
+      "acousticScore": 0.86,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "2:0",
+      "section": 2,
+      "text": "اَلْحَمْدُ",
+      "letterIds": [
+        "2:0",
+        "2:2",
+        "2:4",
+        "2:6",
+        "2:8"
+      ],
+      "start": 12.806,
+      "end": 14.026,
+      "acousticScore": 0.902,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "2:1",
+      "section": 2,
+      "text": "لِلّٰهِ",
+      "letterIds": [
+        "2:11",
+        "2:13",
+        "2:16"
+      ],
+      "start": 14.086,
+      "end": 15.447,
+      "acousticScore": 0.953,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "2:2",
+      "section": 2,
+      "text": "رَبِّ",
+      "letterIds": [
+        "2:19",
+        "2:21"
+      ],
+      "start": 15.527,
+      "end": 16.487,
+      "acousticScore": 0.936,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "2:3",
+      "section": 2,
+      "text": "الْعَالَم۪ينَۙ",
+      "letterIds": [
+        "2:25",
+        "2:26",
+        "2:28",
+        "2:30",
+        "2:31",
+        "2:33",
+        "2:35",
+        "2:36"
+      ],
+      "start": 16.507,
+      "end": 18.208,
+      "acousticScore": 0.789,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "3:0",
+      "section": 3,
+      "text": "اَلرَّحْمٰنِ",
+      "letterIds": [
+        "3:0",
+        "3:2",
+        "3:3",
+        "3:6",
+        "3:8",
+        "3:10"
+      ],
+      "start": 18.268,
+      "end": 19.949,
+      "acousticScore": 0.847,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "3:1",
+      "section": 3,
+      "text": "الرَّح۪يمِۙ",
+      "letterIds": [
+        "3:13",
+        "3:14",
+        "3:15",
+        "3:18",
+        "3:20",
+        "3:21"
+      ],
+      "start": 20.009,
+      "end": 21.35,
+      "acousticScore": 0.818,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "4:0",
+      "section": 4,
+      "text": "مَالِكِ",
+      "letterIds": [
+        "4:0",
+        "4:2",
+        "4:3",
+        "4:5"
+      ],
+      "start": 21.51,
+      "end": 22.65,
+      "acousticScore": 0.904,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "4:1",
+      "section": 4,
+      "text": "يَوْمِ",
+      "letterIds": [
+        "4:8",
+        "4:10",
+        "4:12"
+      ],
+      "start": 22.71,
+      "end": 23.47,
+      "acousticScore": 0.91,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "4:2",
+      "section": 4,
+      "text": "الدّ۪ينِۜ",
+      "letterIds": [
+        "4:15",
+        "4:16",
+        "4:17",
+        "4:20",
+        "4:21"
+      ],
+      "start": 23.55,
+      "end": 26.412,
+      "acousticScore": 0.741,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "5:0",
+      "section": 5,
+      "text": "اِيَّاكَ",
+      "letterIds": [
+        "5:0",
+        "5:2",
+        "5:5",
+        "5:6"
+      ],
+      "start": 26.572,
+      "end": 27.672,
+      "acousticScore": 0.919,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "5:1",
+      "section": 5,
+      "text": "نَعْبُدُ",
+      "letterIds": [
+        "5:9",
+        "5:11",
+        "5:13",
+        "5:15"
+      ],
+      "start": 27.892,
+      "end": 28.933,
+      "acousticScore": 0.837,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "5:2",
+      "section": 5,
+      "text": "وَاِيَّاكَ",
+      "letterIds": [
+        "5:18",
+        "5:20",
+        "5:22",
+        "5:25",
+        "5:26"
+      ],
+      "start": 29.013,
+      "end": 30.654,
+      "acousticScore": 0.956,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "5:3",
+      "section": 5,
+      "text": "نَسْتَع۪ينُۜ",
+      "letterIds": [
+        "5:29",
+        "5:31",
+        "5:33",
+        "5:35",
+        "5:37",
+        "5:38"
+      ],
+      "start": 30.754,
+      "end": 33.615,
+      "acousticScore": 0.91,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "6:0",
+      "section": 6,
+      "text": "اِهْدِنَا",
+      "letterIds": [
+        "6:0",
+        "6:2",
+        "6:4",
+        "6:6",
+        "6:8"
+      ],
+      "start": 33.755,
+      "end": 34.655,
+      "acousticScore": 0.729,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "6:1",
+      "section": 6,
+      "text": "الصِّرَاطَ",
+      "letterIds": [
+        "6:10",
+        "6:11",
+        "6:12",
+        "6:15",
+        "6:17",
+        "6:18"
+      ],
+      "start": 34.695,
+      "end": 36.116,
+      "acousticScore": 0.888,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "6:2",
+      "section": 6,
+      "text": "الْمُسْتَق۪يمَۙ",
+      "letterIds": [
+        "6:21",
+        "6:22",
+        "6:24",
+        "6:26",
+        "6:28",
+        "6:30",
+        "6:32",
+        "6:33"
+      ],
+      "start": 36.176,
+      "end": 38.017,
+      "acousticScore": 0.889,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "7:0",
+      "section": 7,
+      "text": "صِرَاطَ",
+      "letterIds": [
+        "7:0",
+        "7:2",
+        "7:4",
+        "7:5"
+      ],
+      "start": 38.137,
+      "end": 39.157,
+      "acousticScore": 0.934,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "7:1",
+      "section": 7,
+      "text": "الَّذ۪ينَ",
+      "letterIds": [
+        "7:8",
+        "7:9",
+        "7:12",
+        "7:14",
+        "7:15"
+      ],
+      "start": 39.197,
+      "end": 40.558,
+      "acousticScore": 0.894,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "7:2",
+      "section": 7,
+      "text": "اَنْعَمْتَ",
+      "letterIds": [
+        "7:18",
+        "7:20",
+        "7:22",
+        "7:24",
+        "7:26"
+      ],
+      "start": 40.658,
+      "end": 41.919,
+      "acousticScore": 0.91,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "7:3",
+      "section": 7,
+      "text": "عَلَيْهِمْۙ",
+      "letterIds": [
+        "7:29",
+        "7:31",
+        "7:33",
+        "7:35",
+        "7:37"
+      ],
+      "start": 42.059,
+      "end": 43.419,
+      "acousticScore": 0.933,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "7:4",
+      "section": 7,
+      "text": "غَيْرِ",
+      "letterIds": [
+        "7:41",
+        "7:43",
+        "7:45"
+      ],
+      "start": 43.719,
+      "end": 44.76,
+      "acousticScore": 0.959,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "7:5",
+      "section": 7,
+      "text": "الْمَغْضُوبِ",
+      "letterIds": [
+        "7:48",
+        "7:49",
+        "7:51",
+        "7:53",
+        "7:55",
+        "7:57",
+        "7:58"
+      ],
+      "start": 45.04,
+      "end": 46.381,
+      "acousticScore": 0.768,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "7:6",
+      "section": 7,
+      "text": "عَلَيْهِمْ",
+      "letterIds": [
+        "7:61",
+        "7:63",
+        "7:65",
+        "7:67",
+        "7:69"
+      ],
+      "start": 46.521,
+      "end": 47.801,
+      "acousticScore": 0.899,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "7:7",
+      "section": 7,
+      "text": "وَلَا",
+      "letterIds": [
+        "7:72",
+        "7:74",
+        "7:76"
+      ],
+      "start": 47.941,
+      "end": 51.363,
+      "acousticScore": 0.956,
+      "reviewed": false,
+      "issues": []
+    },
+    {
+      "id": "7:8",
+      "section": 7,
+      "text": "الضَّٓالّ۪ينَ",
+      "letterIds": [
+        "7:78",
+        "7:79",
+        "7:80",
+        "7:84",
+        "7:85",
+        "7:88",
+        "7:89"
+      ],
+      "start": 51.403,
+      "end": 52.183,
+      "acousticScore": 0.286,
+      "reviewed": false,
+      "issues": []
+    }
+  ],
+  "warning": "Unreviewed word intervals only. Scores are not calibrated confidence. No letter times inferred."
+}

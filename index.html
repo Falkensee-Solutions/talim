@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#176b62">
+  <title>Talim · Fatiha’yı birlikte öğrenelim</title>
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./waveform.css">
+  <link rel="stylesheet" href="./hold-timing.css">
+  <link rel="stylesheet" href="./memorization.css">
+  <script type="module" src="./app.mjs"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./"><span class="brand-icon" aria-hidden="true">✦</span> talim <span class="brand-note">dinle · söyle · öğren</span></a>
+    <button id="open-editor" class="quiet" hidden>⚙ <span>Büyükler için</span></button>
+  </header>
+  <main>
+    <section class="lesson" aria-label="Fatiha öğrenme alanı">
+      <div class="lesson-heading"><div><p class="eyebrow">1. SURE · 7 AYET</p><h1 class="lesson-title">Fatiha Suresi</h1></div><button id="open-memory" class="primary memory-launch" aria-haspopup="dialog">✦ Sureyi ezberle</button></div>
+      <fieldset class="modes" hidden><legend>Nasıl dinleyelim?</legend>
+        <button type="button" data-mode="many" aria-pressed="false" disabled><span aria-hidden="true">▦</span>Çok parçalı<small>Kelime kelime</small></button>
+        <button type="button" data-mode="medium" aria-pressed="false" disabled><span aria-hidden="true">▤</span>Orta parçalı<small>Kısa gruplar</small></button>
+        <button type="button" data-mode="few" aria-pressed="false" disabled><span aria-hidden="true">▥</span>Az parçalı<small>Ayet ayet</small></button>
+        <button type="button" data-mode="full" aria-pressed="true"><span aria-hidden="true">◯</span>Tam<small>Bütün sure</small></button>
+      </fieldset>
+      <p class="selection-help">Dinlenecek ayetleri soldaki düğmelerden seç.</p>
+      <div id="memory-session" class="memory-session" hidden><span id="memory-step-label" role="status" aria-live="polite"></span><div id="memory-turn-visual" class="memory-turn-visual" role="img"></div><p id="memory-part-text" class="memory-part-text" lang="ar" dir="rtl" hidden></p><button id="memory-next" class="primary" hidden>Sonraki ayete geç →</button><button id="exit-memory" class="secondary">Ezber modundan çık</button></div>
+      <div class="reading-heading"><span id="segment-title">Fatiha’nın tamamı</span></div>
+      <div id="verse-controls" class="verse-controls" aria-label="Seçili ayetlerden dinleme">
+        <div id="selected-verse-label" class="verse-chips" role="status"></div>
+        <button id="play-from-verse" class="secondary icon-action" aria-label="Seçilen ayetleri dinle" title="Seçilen ayetleri dinle" disabled><span aria-hidden="true">▶</span></button>
+        <button id="loop-verse" class="secondary icon-action" aria-label="Seçilen ayetleri tekrarla" title="Seçilen ayetleri tekrarla" disabled><span aria-hidden="true">↻</span></button>
+      </div>
+      <div id="verses" class="verses"></div>
+      <div class="player">
+        <div class="player-status"><span id="phase" role="status" aria-live="polite">Hazırsan başlayalım!</span><span id="clock">0:00 / 0:54</span></div>
+        <div id="repeat-gap" class="repeat-gap" role="img" hidden><span class="gap-icon" aria-hidden="true">⌛</span><span id="gap-seconds" class="gap-seconds" aria-hidden="true">5</span><span id="gap-dots" class="gap-dots" aria-hidden="true"></span></div>
+        <div class="progress" aria-hidden="true"><div id="progress-fill"></div></div>
+        <div class="player-buttons">
+          <button id="previous" class="secondary" disabled><span aria-hidden="true">←</span><span>Önceki</span></button>
+          <button id="listen" class="primary" disabled><span id="listen-icon" aria-hidden="true">▶</span><span id="listen-label">Dinle</span></button>
+          <button id="repeat" class="secondary" disabled><span aria-hidden="true">↻</span><span>Baştan tekrar et</span></button>
+          <button id="repeat-verse" class="secondary" disabled><span aria-hidden="true">↺</span><span>Ayeti tekrar et</span></button>
+          <button id="next" class="secondary" disabled><span aria-hidden="true">→</span><span>Sonraki</span></button>
+          <button id="stop-playback" class="secondary"><span aria-hidden="true">■</span><span>Durdur</span></button>
+          <button id="open-display-settings" class="secondary" aria-haspopup="dialog" aria-label="Görünüm ayarları" title="Görünüm ayarları"><span aria-hidden="true">⚙</span><span>Ayarlar</span></button>
+        </div>
+      </div>
+    </section>
+    <aside class="parent-note"><span aria-hidden="true">♡</span><p><strong>Birlikte öğrenmek daha güzel.</strong> Türkçe okunuş yalnızca yardımcıdır; Arapça seslerin birebir karşılığı değildir. Doğru telaffuz için bir hocadan destek alın.</p></aside>
+  </main>
+  <footer><span>Talim · Fatiha başlangıç dersi</span><span>Metin ve okunuş: <a href="https://acikkuran.com/fatiha-suresi.md" target="_blank" rel="noreferrer">Açık Kuran</a> · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.tr" target="_blank" rel="noreferrer">CC BY-NC-SA 4.0</a></span></footer>
+  <audio id="audio" src="./001.mp3" preload="auto"></audio>
+  <dialog id="display-settings" aria-labelledby="display-settings-title">
+    <div class="editor-heading"><h2 id="display-settings-title">Görünüm ayarları</h2><button id="close-display-settings" class="quiet" autofocus>Kapat ✕</button></div>
+    <label class="display-option"><span>Türkçe okunuş</span><input id="toggle-reading" type="checkbox" checked></label>
+    <label class="display-option"><span>Oku göster</span><input id="word-preview" type="checkbox" checked disabled></label>
+  </dialog>
+  <dialog id="memory-dialog" aria-labelledby="memory-title">
+    <div class="editor-heading"><h2 id="memory-title">Ezber zamanı</h2><button id="close-memory" class="quiet" autofocus>Kapat ✕</button></div>
+    <section id="memory-setup" class="memory-setup" aria-label="Ezber ayarları">
+      <div id="memory-repetition-note" class="talim-visual" role="img" aria-label="Hoca bir defa, öğrenci üç defa tekrar eder."></div>
+      <fieldset class="memory-repetitions repeat-options"><legend>Sen kaç kez?</legend><button data-memory-repetitions="1" aria-label="1 defa tekrar et" aria-pressed="false">1</button><button data-memory-repetitions="3" aria-label="3 defa tekrar et" aria-pressed="true">3</button><button data-memory-repetitions="5" aria-label="5 defa tekrar et" aria-pressed="false">5</button><button data-memory-repetitions="7" aria-label="7 defa tekrar et" aria-pressed="false">7</button></fieldset>
+      <fieldset class="memory-repetitions"><legend>Nasıl ezberleyelim?</legend><button data-memory-mode="full" aria-pressed="false">Tam · Fatiha’nın tamamı</button><button data-memory-mode="verse" aria-pressed="true">Az parçalı · Ayet ayet</button><button data-memory-mode="medium" aria-pressed="false">Orta adımlar · Kısa gruplar</button><button data-memory-mode="many" aria-pressed="false">Küçük adımlar · Kelime kelime</button></fieldset>
+      <fieldset class="memory-verses"><legend>Seçili ayetler · Dinlemeyle ortak</legend><div id="memory-verse-picker"></div></fieldset>
+      <fieldset id="memory-parts" class="memory-parts" hidden><legend>Hangi adımları çalışalım?</legend><div id="memory-part-picker"></div></fieldset>
+      <p id="memory-mode-help" class="memory-help">Her seçili ayette hoca 1 defa, sen 3 defa. Sonraki ayete kendin geçersin.</p>
+      <p class="memory-help">Senin turunda ses yok; kırmızı oku takip ederek söyle. Mikrofon kullanılmaz. Ok kayıtlı, yaklaşık eşleşmeleri kullanır. Adımlar elle düzenlenebilir bir taslaktır; öğretmen kontrolü gerekir. Kelimeler ve uzatmalar kendi içinde bölünmez.</p>
+      <p id="memory-availability" role="status" aria-live="polite"></p>
+      <button id="start-memory" class="primary" disabled>✦ Ezber moduna gir</button>
+    </section>
+  </dialog>
+  <dialog id="editor" aria-labelledby="editor-title">
+    <div class="editor-heading"><div><p class="eyebrow">YALNIZCA BÜYÜKLER İÇİN</p><h2 id="editor-title">Ses ve harf eşleştirme</h2></div><button id="close-editor" class="quiet">Kapat ✕</button></div>
+    <p>Sureyi bilen öğretmen, ses çalarken gösterilen harfin üzerinde basılı tutarak eşleştirebilir. Bırakınca sıradaki harfe geçilir. Saniye yazmanız gerekmez. Harekeler ve şedde harfle birlikte gösterilir; uzatmalarda basılı tutmaya devam edin.</p>
+    <p class="notice">Kaydettiğiniz eşleşmeler bu surenin içerik dosyasına yazılır ve yeniden açınca yüklenir. Bu, çocuğun ilerleme kaydı değildir. Ses bilgisayardan dışarı gönderilmez.</p>
+    <p id="save-state" role="status" aria-live="polite">Kayıt bilgisi yükleniyor…</p>
+    <label class="field">Ayet<select id="editor-verse"></select></label>
+    <p id="editor-arabic" class="editor-arabic" lang="ar" dir="rtl"></p>
+    <p class="notice">Harekesiz harfler ayrı eşleştirme adımı değildir. Aynı kelimede bir harekeli harften sonra geliyorlarsa o harfle birlikte gösterilirler: örneğin «حِي» tek adımdır. Uzatma bitene kadar basılı tutun. Kelime başındaki harekesizler ayrıca seçilmez; metindeki bütün harfler ve ses kaydı korunur.</p>
+    <div id="letter-picker" class="letter-picker" dir="rtl" aria-label="Zamanlanacak harfi seçin"></div>
+    <section class="live-timing" aria-labelledby="live-title">
+      <h3 id="live-title">Dinlerken basılı tutarak eşleştir</h3>
+      <p>Sesi başlat. Gösterilen harf grubunun üzerinde basılı tut; uzatma varsa bitene kadar bırakma. Bırakınca aralık kaydedilir ve sıradaki grup gelir. Harekesiz harfler ayrıca gelmez.</p>
+      <div class="live-actions"><button id="live-play" class="primary">▶ Eşleştirmeyi başlat</button><button id="live-restart" class="secondary">↶ Seçili harften tekrar dinle</button><label class="field">Eşleştirme hızı<select id="alignment-speed"><option value="0.5">0,5× · Yavaş</option><option value="0.75">0,75×</option><option value="1">1× · Normal</option><option value="0.25">0,25× · Çok yavaş</option></select></label></div>
+      <div class="live-actions"><button id="space-next" class="secondary" disabled>Boşluk · Başlat / Sonraki harf</button><button id="end-verse" class="secondary" disabled>Ayeti bitir → Sonraki ayet</button></div>
+      <div class="live-tiles"><button id="hold-letter" class="hold-letter" aria-label="Gösterilen harf okunurken basılı tut" disabled><span id="hold-glyph" lang="ar" dir="rtl"></span><small id="hold-hint">Harf okunurken basılı tut</small></button><div class="upcoming-letter"><small>Sıradaki harf</small><span id="next-glyph" lang="ar" dir="rtl"></span></div></div>
+      <p id="live-status" role="status" aria-live="polite">Öğretmen eşleştirmesi · Uzatmada basılı tutmaya devam et. Boşluklarda bırak.</p>
+      <p class="live-help">Boşluk tuşuna bir kez basınca mevcut grup başlar; tekrar basınca biter ve sıradaki grup başlar. Basılı tutmak gerekmez. Durak veya ayet sonunda «Ayeti bitir» ile son grubu kaydet ve sesi durdur. Sonraki ayet seçilir; devam etmek için sesi başlatıp ilk harfte boşluğa bas. Enter veya dokunmatik harf düğmesi hâlâ basılı tut/bırak yöntemiyle çalışır. Yavaşlatma yalnızca öğretmen eşleştirmesinde geçerlidir; zamanlar özgün ses konumlarından alınır.</p>
+    </section>
+    <div class="timing-card">
+      <div class="selected-letter"><span id="selected-letter" lang="ar" dir="rtl"></span><span id="letter-position"></span></div>
+      <div class="editor-transport"><button id="editor-play" class="secondary">▶ Sesi dinle</button><button id="editor-back" class="secondary">↶ Biraz geri</button><label class="field">Görünüm<select id="wave-zoom"><option value="6">Yakından</option><option value="0">Bütün kayıt</option></select></label></div>
+      <p class="wave-tip">Ses dalgasına dokunarak dinleme noktasını seç. Başlangıç ve bitiş tutamaçlarını sürükleyerek aralığı ayarla.</p>
+      <div id="waveform" class="waveform"><canvas id="wave-canvas" tabindex="0" role="slider" aria-label="Ses dalgasında dinleme konumu" aria-valuemin="0" aria-valuemax="54" aria-valuenow="0"></canvas><button id="start-handle" class="wave-handle start" aria-label="Harf başlangıcını sürükle" title="Başlangıç">Baş<span></span></button><button id="end-handle" class="wave-handle end" aria-label="Harf bitişini sürükle" title="Bitiş">Son<span></span></button></div>
+      <div class="wave-navigation"><button id="wave-previous" class="quiet">← Önceki bölüm</button><span id="wave-label"></span><button id="wave-next" class="quiet">Sonraki bölüm →</button></div>
+      <div class="editor-actions"><button id="mark-start" class="secondary">Başlangıcı işaretle</button><button id="mark-end" class="secondary">Bitişi işaretle</button></div>
+      <details class="fine-timing"><summary>İsteğe bağlı hassas sayı ayarı</summary><div class="timing-fields"><label class="field">Başlangıç (saniye)<input id="start-time" type="number" min="0" step="0.01"></label><label class="field">Bitiş (saniye)<input id="end-time" type="number" min="0" step="0.01"></label><label class="field">Ses konumu (saniye)<input id="seek-time" type="number" min="0" step="0.01" value="0"></label><button id="seek" class="secondary">Konuma git</button></div></details>
+      <label class="review-check"><input id="reviewed" type="checkbox">Bu harf grubunu, uzatmasıyla birlikte dinledim ve doğruladım.</label>
+      <div class="editor-actions"><button id="preview-letter" class="secondary">Aralığı dinle</button><button id="save-letter" class="primary">Harfi kaydet ve ilerle</button><button id="delete-letter" class="quiet">Bu zamanı sil</button></div>
+    </div>
+    <p id="editor-message" role="status" aria-live="polite"></p>
+    <div class="editor-bottom"><span id="timing-count"></span><button id="export" class="secondary">JSON indir</button><label class="file-button secondary">JSON içe aktar<input id="import" type="file" accept=".json,application/json"></label></div>
+    <label id="export-fallback" class="field" hidden>İndirme başlamazsa bu JSON metnini kopyalayıp .json dosyası olarak saklayın.<textarea id="export-text" rows="8" readonly spellcheck="false"></textarea></label>
+    <details><summary>Kullanım ve kaynaklar</summary><p>Eşleştirme hızı 0,25× / 0,5× / 0,75× / 1× olabilir; çocuk dinlemesi normal hızda kalır. Boşluk tuşu tekrar basıldığında mevcut grubu bitirip sonraki grubu başlatır; tuşu basılı tutmanın tekrarlanan olayları yok sayılır. Yazı/sayı alanları ve seçim kutularında kısayol çalışmaz. «Ayeti bitir» açık grubu kaydeder, sesi durdurur ve sıradaki ayeti seçer; eksik gruplar için zaman uydurulmaz.</p><p>Ezber modu: Fatiha’nın yedi ayeti başlangıçta seçilidir; dokunarak istenmeyen ayetler kaldırılır. Tekrar sayısı çocuğun sessiz okuma turları için 1, 3 veya 5’tir. Her seçili ayet için hoca bir kez sesli okur, ardından ses çalmadan ok aynı doğrulanmış harf zamanları boyunca ilerler. Çocuğun sesi dinlenmez/kaydedilmez ve okuma doğruluğu puanlanmaz. Sonra sıradaki seçili ayete geçilir. Eûzü ayet seçimine dahil değildir. Yalnızca seçili ayetlerin okunan harf zamanları tamamlanıp doğrulanmışsa mod açılır; eksik zamanlar tahmin edilmez. Duraklatma sonrası aynı ayet hocadan baştan başlar. Ayet seçimi ve tekrar sayısı kalıcı kaydedilmez.</p><p>Harekesiz harfler otomatik olarak ayrı eşleştirme adımından çıkarılır. Harekeli bir harfin ardından aynı kelimede gelen harekesizler onun grubuna eklenir; kelime/ayet sınırı aşılmaz. Med harfleri ses kaydından silinmez; uzatma boyunca aynı grup üzerinde basılı tutulur. Cezim, şedde, normal harekeler ve kaynak metindeki esre işareti hareke kabul edilir. Vakıf işaretleri hareke sayılmaz. Kelime başındaki harekesizlere ayrıca zaman verilmez. Ok, grubun zamanında birlikte gösterilen harfleri takip eder. Eski dosyalar harf gruplarına uyarlanır; uzatma harfinin zamanı eksikse grup doğrulanmamış olarak kalır ve öğretmen tarafından yeniden kontrol edilir. Yeni dosyalarda eşleştirme biçimi haraka-groups-v1 olarak saklanır. Otomatik ses tanıma veya tecvid analizi yapılmaz.</p><p>Canlı eşleştirme: sesi başlatın, gösterilen harf okunurken basılı tutun, bittiğinde bırakın. Basma ve bırakma anları doğrudan sesin zamanından alınır; aralık öğretmen tarafından işaretlenmiş olarak kaydedilir. Sıradaki harfe otomatik geçilir; ses durmaz. Harekesizler için ayrıca basılmaz; uzatmalar bitişik harekeli harfin grubuna dahildir. Kesilen dokunma veya odak kaybında açık aralık kaydedilmez. Bu yöntem otomatik tanıma veya kusursuz fonem doğrulaması değildir; insan tepki süresinden kaynaklanan hataları dinleyerek kontrol edin.</p><p>Ses dalgasına dokunup dinlemeyi başlatın. Harfin başlangıcını ve bitişini düğmelerle işaretleyin veya tutamaçları sürükleyin; «Aralığı dinle» ile kontrol edin. Sayı girişi yalnızca isteğe bağlı hassas ayardır. Doğrulama kutusunu işaretleyip kaydedin. Eşleşmeler yerel sunucu tarafından data/fatiha-timing.json dosyasına yazılır ve yeniden açınca yüklenir. Bütün harfler doğrulanınca parçalı dinleme açılır. Harf sıraları çakışamaz; sessizliklerde ok görünmez. Türkçe okunuş aynı harf zamanlarıyla eşlenmiş değildir.</p><p>Eûzü, Fatiha’nın yedi ayetine dahil olmayan ayrı başlangıçtır. Kullanıcının teyidine göre mevcut kaydın başında okunur; eşleştirme önce Eûzü harflerinden başlar. Daha önceki Fatiha harf kimlikleri korunur; eklenen Eûzü için ayrıca zamanlama yapılmalıdır. Çocuklara uygun gösterim için kaynak metindeki U+06EA küçük yuvarlakları standart esre (U+0650) olarak gösterilir; cezim ve diğer harekeler korunur. Bu görünüm uyarlamasıdır; özgün kaynak metni, harf kimlikleri ve ses eşleştirme konumları değiştirilmez.</p><p>Kelime kelime / iki kelimelik gruplar / ayet ayet / tam sure seçenekleri sesin hızını değiştirmez. Çocuk sesi kaydedilmez. Çerez, hesap veya otomatik ilerleme kaydı yoktur.</p><p>Metin ve okunuş <a href="https://acikkuran.com/fatiha-suresi.md" target="_blank" rel="noreferrer">Açık Kuran</a> kaynağından 8 Kasım 2026 tarihinde alındı; <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.tr" target="_blank" rel="noreferrer">CC BY-NC-SA 4.0</a> koşulları geçerlidir. Meal kullanılmadı. Ses kullanıcı tarafından yerel kullanım için sağlandı; GitHub’a veya başka bir platforma yüklemek için ayrıca dağıtım izni kontrol edilmelidir.</p><p>Teknik araştırma: <a href="https://api.quran.com/api/v4/chapter_recitations/7/1?segments=true" target="_blank" rel="noreferrer">Quran.com kelime zamanları</a> başka bir kayda aittir; kullanılmadı. <a href="https://github.com/m-bain/whisperX/blob/main/whisperx/alignment.py" target="_blank" rel="noreferrer">WhisperX Arapça karakter hizalama desteği</a> ileride yerel olarak denenebilir; henüz kurulmadı veya çalıştırılmadı.</p></details>
+  </dialog>
+</body>
+</html>

@@ -1,0 +1,254 @@
+{
+  "version": 1,
+  "alignment": "word-preview-overrides-v1",
+  "audio": {
+    "sha256": "49e7eb357c18613d483bbc1838ab51c5dcfe6bb6d6161c69c2a68cb710a9576f",
+    "duration": 54.204125,
+    "excerpt": {
+      "start": 0,
+      "end": 54.204125
+    }
+  },
+  "source": {
+    "excerptStart": 46,
+    "model": "jonatasgrosman/wav2vec2-large-xlsr-53-arabic",
+    "input": "عليهم ولا ضاااللييين",
+    "rawFile": "final-phrase-local/diagnostic-raw.json",
+    "note": "Recording-specific experimental pronunciation representation, not canonical Quran text or general Tajweed rules."
+  },
+  "overrides": [
+    {
+      "id": "7:6",
+      "text": "عَلَيْهِمْ",
+      "start": 46.542,
+      "end": 47.765,
+      "acousticScore": 0.943,
+      "reviewed": false,
+      "groupRanges": [
+        {
+          "id": "7:61",
+          "start": 46.542,
+          "end": 46.742,
+          "acousticCharacters": [
+            {
+              "char": "ع",
+              "start": 46.542,
+              "end": 46.742,
+              "score": 0.949
+            }
+          ],
+          "source": "local-ctc-character-groups",
+          "reviewed": false
+        },
+        {
+          "id": "7:63",
+          "start": 46.742,
+          "end": 47.023,
+          "acousticCharacters": [
+            {
+              "char": "ل",
+              "start": 46.742,
+              "end": 47.023,
+              "score": 0.976
+            }
+          ],
+          "source": "local-ctc-character-groups",
+          "reviewed": false
+        },
+        {
+          "id": "7:65",
+          "start": 47.023,
+          "end": 47.324,
+          "acousticCharacters": [
+            {
+              "char": "ي",
+              "start": 47.023,
+              "end": 47.324,
+              "score": 0.993
+            }
+          ],
+          "source": "local-ctc-character-groups",
+          "reviewed": false
+        },
+        {
+          "id": "7:67",
+          "start": 47.324,
+          "end": 47.625,
+          "acousticCharacters": [
+            {
+              "char": "ه",
+              "start": 47.324,
+              "end": 47.625,
+              "score": 0.95
+            }
+          ],
+          "source": "local-ctc-character-groups",
+          "reviewed": false
+        },
+        {
+          "id": "7:69",
+          "start": 47.625,
+          "end": 47.765,
+          "acousticCharacters": [
+            {
+              "char": "م",
+              "start": 47.625,
+              "end": 47.765,
+              "score": 0.846
+            }
+          ],
+          "source": "local-ctc-character-groups",
+          "reviewed": false
+        }
+      ]
+    },
+    {
+      "id": "7:7",
+      "text": "وَلَا",
+      "start": 47.926,
+      "end": 48.828,
+      "acousticScore": 0.931,
+      "reviewed": false,
+      "groupRanges": [
+        {
+          "id": "7:72",
+          "start": 47.926,
+          "end": 48.206,
+          "acousticCharacters": [
+            {
+              "char": "و",
+              "start": 47.926,
+              "end": 48.206,
+              "score": 0.993
+            }
+          ],
+          "source": "local-ctc-character-groups",
+          "reviewed": false
+        },
+        {
+          "id": "7:74",
+          "start": 48.206,
+          "end": 48.828,
+          "acousticCharacters": [
+            {
+              "char": "ل",
+              "start": 48.206,
+              "end": 48.467,
+              "score": 0.908
+            },
+            {
+              "char": "ا",
+              "start": 48.467,
+              "end": 48.828,
+              "score": 0.892
+            }
+          ],
+          "source": "local-ctc-character-groups",
+          "reviewed": false
+        }
+      ]
+    },
+    {
+      "id": "7:8",
+      "text": "الضَّٓالّ۪ينَ",
+      "start": 48.989,
+      "end": 53.659002,
+      "acousticScore": 0.537,
+      "reviewed": false,
+      "groupRanges": [
+        {
+          "id": "7:80",
+          "start": 48.989,
+          "end": 51.456,
+          "acousticCharacters": [
+            {
+              "char": "ض",
+              "start": 48.989,
+              "end": 51.396,
+              "score": 0.984
+            },
+            {
+              "char": "ا",
+              "start": 51.396,
+              "end": 51.416,
+              "score": 0.029
+            },
+            {
+              "char": "ا",
+              "start": 51.416,
+              "end": 51.436,
+              "score": 0.043
+            },
+            {
+              "char": "ا",
+              "start": 51.436,
+              "end": 51.456,
+              "score": 0.021
+            }
+          ],
+          "source": "local-ctc-character-groups",
+          "reviewed": false
+        },
+        {
+          "id": "7:85",
+          "start": 51.456,
+          "end": 53.402,
+          "acousticCharacters": [
+            {
+              "char": "ل",
+              "start": 51.456,
+              "end": 51.476,
+              "score": 0.535
+            },
+            {
+              "char": "ل",
+              "start": 51.476,
+              "end": 52.178,
+              "score": 0.973
+            },
+            {
+              "char": "ي",
+              "start": 52.178,
+              "end": 52.88,
+              "score": 0.97
+            },
+            {
+              "char": "ي",
+              "start": 52.88,
+              "end": 53.041,
+              "score": 0.873
+            },
+            {
+              "char": "ي",
+              "start": 53.041,
+              "end": 53.402,
+              "score": 0.944
+            }
+          ],
+          "source": "local-ctc-character-groups",
+          "reviewed": false
+        },
+        {
+          "id": "7:89",
+          "start": 53.402,
+          "end": 53.659002,
+          "acousticCharacters": [
+            {
+              "char": "ن",
+              "start": 53.402,
+              "end": 53.422,
+              "score": 0
+            }
+          ],
+          "source": "local-ctc-with-estimated-tail-to-quiet-onset",
+          "reviewed": false,
+          "alignedEnd": 53.422,
+          "issues": [
+            "weak-final-consonant",
+            "tail-is-visual-estimate"
+          ]
+        }
+      ]
+    }
+  ]
+}
