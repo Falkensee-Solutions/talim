@@ -23,7 +23,7 @@ test('serves app and seekable audio without exposing arbitrary files', async t =
   assert.match(html, /Fatiha/);
   assert.doesNotMatch(html, /[✦✧📖]/u);
   assert.equal((html.match(/<svg class="book-icon"/g) || []).length, 3);
-  assert.equal((html.match(/fill="none" stroke="currentColor"/g) || []).length, 3);
+  assert.equal((html.match(/<svg class="book-icon"[^>]*fill="none" stroke="currentColor"/g) || []).length, 3);
   assert.match(html, /<header class="topbar">[\s\S]*id="open-display-settings"[\s\S]*<\/header>/);
   assert.equal((html.match(/id="open-display-settings"/g) || []).length, 1);
   assert.doesNotMatch(html.match(/<div class="player">[\s\S]*?<\/section>/)?.[0] || '', /id="open-display-settings"/);
@@ -51,7 +51,9 @@ test('serves app and seekable audio without exposing arbitrary files', async t =
   assert.match(html, /data-memory-progression="auto" aria-pressed="true">Otomatik<\/button>/);
   assert.match(html, /data-memory-progression="manual" aria-pressed="false">Manuel<\/button>/);
   assert.match(html, /data-memory-reciter="1" aria-pressed="true">Hafız 1<\/button>/);
-  assert.doesNotMatch(html, /<select id="memory-gap-seconds"|<select id="memory-reciter"/);
+  assert.doesNotMatch(html, /<select id="memory-gap-seconds"|<select id="memory-reciter"|<select id="listening-reciter"/);
+  assert.match(html, /<button id="listening-reciter" class="secondary reciter-trigger"[^>]*aria-expanded="false"[^>]*aria-controls="reciter-options"/);
+  assert.match(html, /<div id="reciter-options" class="reciter-options" role="group"[^>]* hidden>/);
   assert.doesNotMatch(html, /memory-repetition-note|memory-mode-help|memory-help|Hoca bir|Sen kaç|Senin turunda/);
   assert.match(html, /class="verse-chips" role="group" aria-label="Dinlenecek ayetleri seç"/);
   assert.match(html, /id="open-editor" class="quiet" hidden/);
@@ -62,7 +64,7 @@ test('serves app and seekable audio without exposing arbitrary files', async t =
   assert.match(html, /class="repeat-gap-track" aria-hidden="true"/);
   assert.match(html, /<dialog id="editor"/);
   assert.doesNotMatch(html, /word-preview-note|player-tip-text|preview-details|class="intro"|id="alignment-note"|selection-help|reading-heading|segment-title/);
-  assert.match(html, /<h1 class="lesson-title">Fatiha Suresi<\/h1>/);
+  assert.match(html, /<h1 id="lesson-title" class="lesson-title" tabindex="-1">Fatiha Suresi<\/h1>/);
   assert.match(html, /<div class="lesson-heading">[\s\S]*?<button id="exit-memory" class="secondary" hidden>/);
   assert.match(html, /id="stop-playback"[\s\S]*?<\/div>\s*<button id="memory-next" class="primary" hidden disabled>/);
   const memoryStatus = html.match(/<div id="memory-session"[\s\S]*?<div id="verse-controls"/)?.[0] || '';

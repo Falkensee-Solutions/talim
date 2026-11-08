@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#176b62">
-  <title>Talim · Fatiha’yı birlikte öğrenelim</title>
+  <title>Talim · Sureler</title>
   <link rel="preload" href="./TalimQuran.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="./style.css">
   <link rel="stylesheet" href="./waveform.css">
@@ -21,8 +21,27 @@
     </div>
   </header>
   <main>
-    <section class="lesson" aria-label="Fatiha öğrenme alanı">
-      <div class="lesson-heading"><div><p class="eyebrow">1. SURE · 7 AYET</p><h1 class="lesson-title">Fatiha Suresi</h1></div><button id="open-memory" class="primary memory-launch" aria-haspopup="dialog"><svg class="book-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 6C9 4 5 4 2 5v14c3-1 7-1 10 1 3-2 7-2 10-1V5c-3-1-7-1-10 1Z"/><path d="M12 6v14"/></svg> Sureyi ezberle</button><button id="exit-memory" class="secondary" hidden>Ezber modundan çık</button></div>
+    <section id="home" class="surah-home" aria-label="Sureler">
+      <ul class="surah-list">
+        <li class="surah-entry">
+          <h1>Fatiha Suresi</h1>
+          <div class="surah-actions">
+            <button id="home-listen" class="secondary">Dinle</button>
+            <button id="home-memory" class="primary" aria-haspopup="dialog">Ezberle</button>
+          </div>
+        </li>
+        <li class="surah-entry">
+          <h1>Fil Suresi</h1>
+          <div class="surah-actions">
+            <button id="home-listen-fil" class="secondary">Dinle</button>
+            <button id="home-memory-fil" class="primary" aria-haspopup="dialog">Ezberle</button>
+          </div>
+        </li>
+      </ul>
+    </section>
+    <section id="lesson" class="lesson" aria-label="Fatiha öğrenme alanı" hidden>
+      <a class="back-home" href="#">← Sureler</a>
+      <div class="lesson-heading"><div><p class="eyebrow">1. SURE · 7 AYET</p><h1 id="lesson-title" class="lesson-title" tabindex="-1">Fatiha Suresi</h1></div><div class="reciter-choice"><span id="reciter-caption">Hafız</span><button id="listening-reciter" class="secondary reciter-trigger" type="button" aria-expanded="false" aria-controls="reciter-options" aria-labelledby="reciter-caption reciter-value" disabled><span id="reciter-value">Hafız 1</span><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m4 6 4 4 4-4"/></svg></button><div id="reciter-options" class="reciter-options" role="group" aria-labelledby="reciter-caption" hidden></div></div><button id="open-memory" class="primary memory-launch" aria-haspopup="dialog"><svg class="book-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 6C9 4 5 4 2 5v14c3-1 7-1 10 1 3-2 7-2 10-1V5c-3-1-7-1-10 1Z"/><path d="M12 6v14"/></svg> Sureyi ezberle</button><button id="exit-memory" class="secondary" hidden>Ezber modundan çık</button></div>
       <fieldset class="modes" hidden><legend>Nasıl dinleyelim?</legend>
         <button type="button" data-mode="many" aria-pressed="false" disabled><span aria-hidden="true">▦</span>Çok parçalı<small>Kelime kelime</small></button>
         <button type="button" data-mode="medium" aria-pressed="false" disabled><span aria-hidden="true">▤</span>Orta parçalı<small>Kısa gruplar</small></button>
@@ -71,7 +90,7 @@
         <fieldset class="memory-repetitions repeat-options"><legend>Tekrar sayısı</legend><button data-memory-repetitions="1" aria-label="1 defa tekrar et" aria-pressed="false">1</button><button data-memory-repetitions="3" aria-label="3 defa tekrar et" aria-pressed="true">3</button><button data-memory-repetitions="5" aria-label="5 defa tekrar et" aria-pressed="false">5</button><button data-memory-repetitions="7" aria-label="7 defa tekrar et" aria-pressed="false">7</button></fieldset>
         <fieldset id="memory-gap-seconds" class="memory-repetitions"><legend>Tekrar arası (saniye)</legend><button type="button" data-memory-gap="0.5" aria-label="0,5 saniye" aria-pressed="false">0,5</button><button type="button" data-memory-gap="1" aria-label="1 saniye" aria-pressed="false">1</button><button type="button" data-memory-gap="1.5" aria-label="1,5 saniye" aria-pressed="true">1,5</button><button type="button" data-memory-gap="2" aria-label="2 saniye" aria-pressed="false">2</button><button type="button" data-memory-gap="3" aria-label="3 saniye" aria-pressed="false">3</button><button type="button" data-memory-gap="4" aria-label="4 saniye" aria-pressed="false">4</button><button type="button" data-memory-gap="5" aria-label="5 saniye" aria-pressed="false">5</button></fieldset>
         <fieldset class="memory-repetitions"><legend>Sonraki ayete geçiş</legend><button type="button" data-memory-progression="auto" aria-pressed="true">Otomatik</button><button type="button" data-memory-progression="manual" aria-pressed="false">Manuel</button></fieldset>
-        <fieldset id="memory-reciter" class="memory-repetitions"><legend>Hafız</legend><button type="button" data-memory-reciter="1" aria-pressed="true">Hafız 1</button></fieldset>
+        <fieldset id="memory-reciter" class="memory-repetitions"><legend>Hafız</legend><button type="button" data-memory-reciter="1" aria-pressed="true">Hafız 1</button><button type="button" data-memory-reciter="2" aria-pressed="false">Hafız 2 AA</button></fieldset>
       </details>
       <p id="memory-availability" role="status" aria-live="polite" hidden></p>
       <button id="start-memory" class="primary" disabled><svg class="book-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 6C9 4 5 4 2 5v14c3-1 7-1 10 1 3-2 7-2 10-1V5c-3-1-7-1-10 1Z"/><path d="M12 6v14"/></svg> Ezber moduna gir</button>

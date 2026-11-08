@@ -1,7 +1,8 @@
-import { letters, sections, alignmentUnits } from './fatiha.mjs';
+import * as activeText from './active-surah.mjs';
 import { weightedUnitBoundaries } from './tajweed-timing.mjs';
 
-export function validateWordPreview(document, audio) {
+export function validateWordPreview(document, audio, text = activeText) {
+  const { letters, sections, alignmentUnits } = text;
   if (document?.version !== 1 || document.alignment !== 'word-candidates-v1'
     || document.audio?.sha256 !== audio.sha256
     || !Number.isFinite(document.audio.duration) || Math.abs(document.audio.duration - audio.duration) > .25
@@ -24,7 +25,7 @@ export function validateWordPreview(document, audio) {
     end = word.end;
     const units = alignmentUnits.filter(unit => unit.verse === word.section && `${unit.verse}:${unit.word}` === word.id);
     if (!units.length) throw new Error('Kelime için hareke grubu bulunamadı.');
-    return { ...word, units, visualBoundaries: weightedUnitBoundaries(units) };
+    return { ...word, units, visualBoundaries: weightedUnitBoundaries(units, letters) };
   });
 }
 
@@ -86,10 +87,46 @@ export function audibleDuration(start, end, silences) {
     removed + Math.max(0, Math.min(end, silence.end) - Math.max(start, silence.start)), 0));
 }
 
+const MAX_CONNECTED_GAP = .3;
+
+function connectedHead(previous, word, silences) {
+  if (!previous || previous.section === undefined || previous.section !== word.section
+    || word.start < previous.end || word.start - previous.end > MAX_CONNECTED_GAP + 1e-9
+    || silences.some(silence => silence.start < word.start && silence.end > previous.end)) return -1;
+  let index = 0;
+  // A written wasl alif is not a separate sound when continuing from the previous word.
+  const wasl = /^(?:ٱ|ا\p{Mark}*ل)/u.test(word.text || '');
+  if (wasl && /^[اٱ]/u.test(word.units[0]?.text || '') && word.units.length > 1) index++;
+  return /[\u0651\u0652]/u.test(word.units[index]?.text || '') ? index : -1;
+}
+
+function connectedVisualUnits(word, head) {
+  const units = word.units.slice(head);
+  if (/\u0652/u.test(units[0].text) && !/\u0651/u.test(units[0].text) && units.length > 1) {
+    const [first, next] = units;
+    units.splice(0, 2, { ...next, offset: first.offset,
+      length: next.offset + next.length - first.offset,
+      text: first.text + next.text, members: [...(first.members || [first.id]), ...(next.members || [next.id])] });
+  }
+  return units;
+}
+
 // Visual movement only: no estimated letter timestamps are saved or called alignment.
-export function wordPreviewAt(time, words, silences = []) {
-  const word = words.find(word => time >= word.start && time < word.end);
-  if (!word || silences.some(silence => time >= silence.start && time < silence.end)) return null;
+export function wordPreviewAt(time, words, silences = [], { start = 0 } = {}) {
+  if (silences.some(silence => time >= silence.start && time < silence.end)) return null;
+  const wordIndex = words.findIndex(word => time >= word.start && time < word.end);
+  if (wordIndex < 0) {
+    const nextIndex = words.findIndex(word => time < word.start);
+    const next = words[nextIndex];
+    const previous = words[nextIndex - 1];
+    if (!next || !previous || previous.start < start || time < previous.end) return null;
+    const head = connectedHead(previous, next, silences);
+    if (head < 0) return null;
+    const units = next.groupRanges ? next.units : connectedVisualUnits(next, head);
+    return { word: next, letter: units[0], fraction: 0,
+      transition: { from: previous.units.at(-1), fraction: (time - previous.end) / (next.start - previous.end) } };
+  }
+  const word = words[wordIndex];
   if (word.groupRanges) {
     const index = word.groupRanges.findIndex(range => time >= range.start && time < range.end);
     if (index < 0) return null;
@@ -101,9 +138,20 @@ export function wordPreviewAt(time, words, silences = []) {
   const duration = audibleDuration(word.start, word.end, silences);
   if (duration <= 0) return null;
   const progress = Math.min(1, audibleDuration(word.start, time, silences) / duration);
-  const boundaries = word.visualBoundaries || Array.from({ length: word.units.length + 1 }, (_, index) => index / word.units.length);
+  const previous = words[wordIndex - 1];
+  const head = connectedHead(previous?.start >= start ? previous : null, word, silences);
+  const units = head < 0 ? word.units : connectedVisualUnits(word, head);
+  const originalBoundaries = word.visualBoundaries
+    || Array.from({ length: word.units.length + 1 }, (_, index) => index / word.units.length);
+  let boundaries = originalBoundaries;
+  if (head >= 0) {
+    boundaries = originalBoundaries.slice(head);
+    if (units.length < word.units.length - head) boundaries.splice(1, 1);
+    const first = boundaries[0];
+    boundaries = boundaries.map(boundary => (boundary - first) / (1 - first));
+  }
   let index = boundaries.findIndex((end, i) => i > 0 && progress < end) - 1;
-  if (index < 0) index = word.units.length - 1;
+  if (index < 0) index = units.length - 1;
   const fraction = Math.min(1 - 1e-9, (progress - boundaries[index]) / (boundaries[index + 1] - boundaries[index]));
-  return { word, letter: word.units[index], fraction };
+  return { word, letter: units[index], fraction };
 }

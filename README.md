@@ -1,12 +1,16 @@
-# Talim · Fatiha
+# Talim · Fatiha ve Fil
 
 Çocuklar için deneysel dinleme ve ezber çalışması.
 
+Ana sayfa mevcut surelerin sade listesidir: Fatiha (1) ve Fil (105). Her surede yalnızca **Dinle** ve **Ezberle** bulunur. Dinle mevcut dinleme alanını açar; Ezberle listeden ayrılmadan ayar penceresini açar ve onaylanınca ezber alanına geçer. Sureler bağlantısı veya Talim logosu listeye döndürür ve oynatmayı durdurur. Tarayıcının geri/ileri düğmeleri desteklenir; `#dinle` dinleme alanını, `#ezber` ise aktif ezber oturumunu veya yeni oturum ayarlarını açar. Mevcut içerik ve eşleşme kayıtları korunur; öğrenci ilerlemesi kaydedilmez.
+
+- Fil Suresi `105.mp3` kaydıyla dinlenir ve tam/ayet/kısa grup/kelime modlarında ezberlenir. `?surah=105` seçili sureyi belirler. Fil için 27 kelime aralığı yalnızca yerel WhisperX hizalamasıyla hazırlanmıştır; otomatik zamanlar öğretmen tarafından doğrulanmış harf/tecvid zamanları değildir. Kayıt Besmele ile başlar; Besmele ayrı başlangıç bölümüdür ve 5 ayetin dışında tutulur. Orta Fil adımları ikişer tam kelimeden oluşur. Fatiha ve Fil sesleri, kaynakları ve zamanlama kayıtları ayrıdır.
 - Ayetleri seçerek dinleme ve sürekli tekrar. Üstteki numara düğmelerinden veya ayet yanındaki düğmelerden aynı dinleme seçimi değiştirilebilir.
+- Dinle ekranında Sureyi ezberle düğmesinin yanındaki Hafız açılır menüsü ve Ezberle → İnce ayarlar hafız seçimi aynı kaydı değiştirir. Açılır menü uygulamanın yeşil/beyaz düğme stilini kullanır; işletim sisteminin yerel seçim penceresi açılmaz. Klavyede ok tuşlarıyla seçenekler gezilir, Enter/Boşluk ile seçilir, Escape ile kapatılır. Fatiha’nın ikinci kaydı `001_2.mp3`, Hafız 2 AA adıyla sunulur. Hafız değişince çalma/ezber oturumu durur; o kaydın ses kimliği, kelime zamanları, sessizlikleri ve ayrı öğretmen eşleşmeleri yüklenir. İlk kaydın zamanları ikinciye uygulanmaz. İkinci kayıt için 34 kelime zaman aralığı WhisperX ile yalnızca yerel olarak üretilmiştir; ayet/kelime çalışması kullanılabilir, fakat bu aralıklar öğretmen tarafından doğrulanmış harf/tecvid zamanları değildir. ASR, referans ve ham hizalama yanıtları `data/alignment-local-001-2-aligned/` altında korunur; ham tanılama dosyaları web yayınına alınmaz.
 - Ezber ayetleri dinleme seçiminden bağımsızdır. Ezber ekranı her açıldığında tüm ayetler seçilir; eşit boyutlu, yalnızca numara gösteren düğmeler 7 sütunlu satırlara yerleşir. Başlığın sağındaki Hiçbirini seçme / Hepsini seç düğmesi toplu seçimi değiştirir; önündeki kare tüm ayetler seçiliyken dolu, diğer durumlarda boştur.
 - Tam, ayet ayet, orta adımlar ve kelime kelime çalışma. Kısa grup/adım seçimleri Arapça okuma yönüne göre sağdan sola dizilir; satırlar yukarıdan aşağıya devam eder. Ses ve adım sırası değişmez.
 - Hoca bir kez okur; öğrenci 1, 3, 5 veya 7 kez sessiz tekrar eder.
-- Ezber ekranındaki İnce ayarlar: tekrar sayısı (varsayılan 3), tekrar arası (0,5; 1; 1,5; 2; 3; 4; 5 saniye, varsayılan 1,5), ayet/adım geçişi (Otomatik/Manuel, varsayılan Otomatik) ve Hafız 1. Hepsi yan yana seçim düğmeleriyle gösterilir. Saniye düğmeleri eşit boyutludur; birim yalnızca başlıktadır.
+- Ezber ekranındaki İnce ayarlar: tekrar sayısı (varsayılan 3), tekrar arası (0,5; 1; 1,5; 2; 3; 4; 5 saniye, varsayılan 1,5), ayet/adım geçişi (Otomatik/Manuel, varsayılan Otomatik) ve hafız seçimi (Fatiha: Hafız 1 / Hafız 2 AA). Hepsi yan yana seçim düğmeleriyle gösterilir. Saniye düğmeleri eşit boyutludur; birim yalnızca başlıktadır.
 - Tekrar sırasında görsel takip; hoca/öğrenci ikonları ve açıklama metinleri gösterilmez. Normal dinlemedeki hazırlık süresi de varsayılan 1,5 saniyedir.
 - Tekrar arası bekleme, kum saatinin yanında 160 px uzunluğunda ve tekrar sayaçları gibi 27 px yüksekliğinde, yuvarlatılmış sarı doluluk göstergesiyle gösterilir. Görünür saniye/sayı yazısı yoktur; doluluk seçilen süre boyunca kesintisiz azalır.
 - Tekrar başlamadan 0,1 saniye önce kırmızı ok ilk konumunda görünür ve başlangıca kadar sabit kalır. Bu görsel hazırlık mevcut beklemenin son 0,1 saniyesinde gerçekleşir; tekrarın başlangıcı, ses zamanları ve ilerleme hızı değişmez.
@@ -55,7 +59,7 @@ statik yayından içerik dosyaları sunucuya kaydedilemez.
 
 ## Kaynaklar ve kullanım hakları
 
-Arapça metin ve Türkçe okunuş: [Açık Kuran](https://acikkuran.com/fatiha-suresi.md),
+Arapça metin ve Türkçe okunuş: Açık Kuran’ın [Fatiha](https://acikkuran.com/fatiha-suresi.md) ve [Fil](https://acikkuran.com/fil-suresi.md) sayfaları,
 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.tr).
 Kaynak atfı arayüzde korunur; ticari kullanım ve yeniden dağıtımda lisans koşullarına
 uyulmalıdır. Bu depo, metin veya ses için genel bir MIT lisansı vermez.

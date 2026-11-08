@@ -1,15 +1,16 @@
-import { alignmentUnits, verses } from './fatiha.mjs';
+import * as activeText from './active-surah.mjs';
 import { validateTimingDocument } from './timing.mjs';
 import { selectedVerseRanges } from './verse-playback.mjs';
 import { buildStudyRanges } from './study-groups.mjs';
 
 export const REPETITION_COUNTS = [1, 3, 5, 7];
 
-export function buildMemorizationSteps(document, audio, selectedVerses, repetitions) {
+export function buildMemorizationSteps(document, audio, selectedVerses, repetitions, text = activeText) {
+  const { alignmentUnits, verses } = text;
   if (!REPETITION_COUNTS.includes(repetitions)) throw new Error('Tekrar sayısı 1, 3, 5 veya 7 olmalı.');
   if (!Array.isArray(selectedVerses) || !selectedVerses.length) throw new Error('En az bir ayet seç.');
-  if (selectedVerses.some(id => !verses.some(verse => verse.id === id))) throw new Error('Geçerli Fatiha ayetleri seçilmeli.');
-  const timings = validateTimingDocument(document, audio);
+  if (selectedVerses.some(id => !verses.some(verse => verse.id === id))) throw new Error('Geçerli sure ayetleri seçilmeli.');
+  const timings = validateTimingDocument(document, audio, { text });
   const lookup = new Map(timings.map(timing => [timing.id, timing]));
   const selected = [...new Set(selectedVerses)].sort((a, b) => a - b);
   const missing = selected.filter(id => alignmentUnits.some(unit => unit.verse === id && !lookup.get(unit.id)?.reviewed));
@@ -25,19 +26,20 @@ export function buildMemorizationSteps(document, audio, selectedVerses, repetiti
   });
 }
 
-export function buildTalimSteps(words, audio, selectedVerses, mode = 'verse', selectedParts = null, repetitions = 3) {
+export function buildTalimSteps(words, audio, selectedVerses, mode = 'verse', selectedParts = null, repetitions = 3, text = activeText) {
+  const { verses } = text;
   if (!REPETITION_COUNTS.includes(repetitions)) throw new Error('Tekrar sayısı 1, 3, 5 veya 7 olmalı.');
   if (!['full', 'verse', 'medium', 'many'].includes(mode)) throw new Error('Geçerli bir ezber türü seç.');
   const selected = mode === 'full' ? verses.map(verse => verse.id) : selectedVerses;
   if (!Array.isArray(selected) || !selected.length || selected.some(id => !verses.some(verse => verse.id === id))) {
-    throw new Error('En az bir Fatiha ayeti seç.');
+    throw new Error('En az bir geçerli sure ayeti seç.');
   }
-  const ranges = selectedVerseRanges(words, selected, audio?.duration);
+  const ranges = selectedVerseRanges(words, selected, audio?.duration, text);
   if (!ranges.length) throw new Error('Seçili ayetlerin kayıtlı kelime zamanları yüklenemedi.');
   const clips = mode === 'full' ? [{ start: ranges[0].start, end: ranges.at(-1).end,
     verse: 1, verses: ranges.map(range => range.verse), key: 'full' }]
     : mode === 'verse' ? ranges.map(range => ({ ...range, verses: [range.verse], key: String(range.verse) }))
-      : buildStudyRanges(words, selected, audio.duration, mode, selectedParts);
+      : buildStudyRanges(words, selected, audio.duration, mode, selectedParts, text);
   if (!clips.length) throw new Error('En az bir adım seç.');
   return clips.flatMap(clip => [
     { ...clip, role: 'teacher', repetition: 0 },

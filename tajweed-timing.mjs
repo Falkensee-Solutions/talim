@@ -1,4 +1,4 @@
-import { letters } from './fatiha.mjs';
+import { letters } from './active-surah.mjs';
 
 export const TAJWEED_BLEND = .15;
 export const MAX_BOUNDARY_SHIFT = .02;
@@ -6,9 +6,8 @@ export const timingSources = {
   med: 'https://tecvid.org/7-ders-med-uzatma/',
   shadda: 'https://tecvid.org/6-ders-diger-idgamlar/',
 };
-const letterById = new Map(letters.map(letter => [letter.id, letter]));
-
-export function groupTimingWeights(units) {
+export function groupTimingWeights(units, textLetters = letters) {
+  const letterById = new Map(textLetters.map(letter => [letter.id, letter]));
   return units.map((unit, index) => {
     const head = letterById.get(unit.id)?.text || unit.text || '';
     const tails = (unit.members || []).filter(id => id !== unit.id).map(id => letterById.get(id)?.text || '');
@@ -37,9 +36,9 @@ export function groupTimingWeights(units) {
   });
 }
 
-export function weightedUnitBoundaries(units) {
+export function weightedUnitBoundaries(units, textLetters = letters) {
   if (!units.length) return [];
-  const hints = groupTimingWeights(units);
+  const hints = groupTimingWeights(units, textLetters);
   const total = hints.reduce((sum, hint) => sum + hint.weight, 0);
   let accumulated = 0;
   const boundaries = [0];

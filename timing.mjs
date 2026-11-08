@@ -1,10 +1,11 @@
-import { letters, alignmentUnits, alignmentUnitFor, sections, sectionLabel } from './fatiha.mjs';
+import * as activeText from './active-surah.mjs';
+const { letters, alignmentUnits, alignmentUnitFor, sections, sectionLabel, activeSurah } = activeText;
 
 export const ALIGNMENT_VERSION = 'haraka-groups-v1';
 
-function migrateLetterTimings(timings) {
+function migrateLetterTimings(timings, units = alignmentUnits) {
   const lookup = new Map(timings.map(timing => [timing.id, timing]));
-  return alignmentUnits.flatMap(unit => {
+  return units.flatMap(unit => {
     const head = lookup.get(unit.id);
     if (!head || head.silent) return [];
     const members = unit.members.map(id => lookup.get(id));
@@ -19,11 +20,12 @@ function migrateLetterTimings(timings) {
   });
 }
 
-export function normalizeTimingDocument(document, audio) {
-  return { version: 1, alignment: ALIGNMENT_VERSION, audio, timings: validateTimingDocument(document, audio) };
+export function normalizeTimingDocument(document, audio, text = activeText) {
+  return { version: 1, alignment: ALIGNMENT_VERSION, audio, timings: validateTimingDocument(document, audio, { text }) };
 }
 
-export function validateSilentLetters(ids = []) {
+export function validateSilentLetters(ids = [], textLetters = letters) {
+  const letters = textLetters;
   if (!Array.isArray(ids)) throw new Error('Okunmayan harf listesi geçerli değil.');
   const known = new Set(letters.map(letter => letter.id));
   if (ids.some(id => !known.has(id)) || new Set(ids).size !== ids.length) {
@@ -45,7 +47,8 @@ export function nextSpokenLetter(id, includeCurrent = false) {
   return alignmentUnits[index + (includeCurrent ? 0 : 1)];
 }
 
-export function validateTimingDocument(document, audio, { requireComplete = false } = {}) {
+export function validateTimingDocument(document, audio, { requireComplete = false, text = activeText } = {}) {
+  const { letters, alignmentUnits } = text;
   if (!document || document.version !== 1 || !Array.isArray(document.timings)) {
     throw new Error('Geçerli bir sürüm 1 zamanlama dosyası seçin.');
   }
@@ -55,7 +58,7 @@ export function validateTimingDocument(document, audio, { requireComplete = fals
   }
   if (document.alignment !== undefined && document.alignment !== ALIGNMENT_VERSION) throw new Error('Bilinmeyen eşleştirme biçimi.');
   const grouped = document.alignment === ALIGNMENT_VERSION;
-  const excluded = new Set(grouped ? [] : validateSilentLetters(document.silentLetters));
+  const excluded = new Set(grouped ? [] : validateSilentLetters(document.silentLetters, letters));
   const known = new Map((grouped ? alignmentUnits : letters).map(letter => [letter.id, letter]));
   const seen = new Set();
   let clean = document.timings.filter(timing => !excluded.has(timing.id)).map(timing => {
@@ -78,7 +81,7 @@ export function validateTimingDocument(document, audio, { requireComplete = fals
       throw new Error('Harf aralıkları okuma sırasında ilerlemeli ve üst üste binmemeli.');
     }
   }
-  if (!grouped) clean = migrateLetterTimings(clean);
+  if (!grouped) clean = migrateLetterTimings(clean, alignmentUnits);
   if (requireComplete && (clean.length !== alignmentUnits.length || clean.some(t => !t.reviewed))) {
     throw new Error('Parçalı dinleme için bütün harflerin zamanları girilmeli ve dinlenerek doğrulanmalı.');
   }
@@ -86,7 +89,7 @@ export function validateTimingDocument(document, audio, { requireComplete = fals
 }
 
 export function buildSegments(mode, timings, duration) {
-  if (mode === 'full') return [{ title: 'Eûzü ve Fatiha’nın tamamı', start: 0, end: duration, verse: 0 }];
+  if (mode === 'full') return [{ title: activeSurah.id === 1 ? 'Eûzü ve Fatiha’nın tamamı' : `${activeSurah.name}’in tamamı`, start: 0, end: duration, verse: 0 }];
   const lookup = new Map(timings.map(timing => [timing.id, timing]));
   if (alignmentUnits.some(unit => !lookup.get(unit.id)?.reviewed)) return [];
   const groups = [];

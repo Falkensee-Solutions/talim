@@ -1,4 +1,4 @@
-import { sections, verses, sectionLabel, displayArabic, alignmentUnits as letters } from './fatiha.mjs';
+import { activeSurah, sections, verses, source, sectionLabel, displayArabic, alignmentUnits as letters } from './active-surah.mjs';
 import { ALIGNMENT_VERSION, validateTimingDocument, nextSpokenLetter, activeLetter } from './timing.mjs';
 import { validateWordPreview, applyPreviewOverrides, validatePreviewSilences, wordPreviewAt } from './word-preview.mjs';
 import { versePlaybackRange, selectedVerseRanges } from './verse-playback.mjs';
@@ -6,10 +6,18 @@ import { createWaveform } from './waveform.mjs';
 import { createHoldRecorder } from './hold-timing.mjs';
 import { buildTalimSteps, nextTalimStep, talimGapAfter, REPEAT_GAP_SECONDS, DEFAULT_PROGRESSION, validateProgression, validateRepeatGapSeconds, repeatGapRemaining, repeatGapFraction, repeatCueTime, memoryTime } from './memorization.mjs';
 import { buildStudyRanges } from './study-groups.mjs';
+import { recitersForSurah, reciterById } from './reciters.mjs';
+
+const reciters = recitersForSurah(activeSurah.id);
 
 const $ = id => document.getElementById(id);
 const audio = $('audio');
 const dialog = $('editor');
+$('lesson').setAttribute('aria-label', `${activeSurah.name} öğrenme alanı`);
+$('lesson-title').textContent = `${activeSurah.name} Suresi`;
+document.querySelector('.lesson-heading .eyebrow').textContent = `${activeSurah.id}. SURE · ${verses.length} AYET`;
+document.querySelector('[data-memory-mode="full"]').textContent = `Tam · ${activeSurah.name} Suresi’nin tamamı`;
+document.querySelectorAll('a[href="https://acikkuran.com/fatiha-suresi.md"]').forEach(link => { link.href = source.url; });
 const markers = new Map();
 const paragraphs = new Map();
 const rows = new Map();
@@ -23,6 +31,9 @@ let timings = [];
 let audioInfo = null;
 let timingApiAvailable = false;
 let audioObjectUrl = null;
+let currentReciter = reciters[0];
+let audioLoading = false;
+const timingEndpoint = () => `./api/timings?surah=${activeSurah.id}&reciter=${currentReciter.id}`;
 let mode = 'full';
 let segments = [];
 let segmentIndex = 0;
@@ -140,11 +151,12 @@ function persistTimings() {
     return Promise.resolve();
   }
   const payload = JSON.stringify(timingDocument());
+  const endpoint = timingEndpoint();
   const sequence = ++saveSequence;
   $('save-state').textContent = 'Eşleşmeler sure dosyasına kaydediliyor…';
   $('save-state').classList.remove('error');
   const operation = saveQueue.then(async () => {
-    const response = await fetch('./api/timings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true });
+    const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: payload, keepalive: true });
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || 'Kayıt yapılamadı.');
     if (sequence === saveSequence) $('save-state').textContent = 'Eşleşmeler bu sure için kaydedildi. Yeniden açınca otomatik yüklenir.';
@@ -207,9 +219,10 @@ function lessonMarker(time) {
     highlight(activeLetter(time, timings));
     return;
   }
-  const position = wordPreviewAt(time, previewWords, repeatCueActive ? [] : previewSilences);
+  const start = memorySession?.steps[memorySession.index]?.start ?? clip?.start ?? 0;
+  const position = wordPreviewAt(time, previewWords, repeatCueActive ? [] : previewSilences, { start });
   if (!position) { clearMarker(); return; }
-  const { letter, fraction } = position;
+  const { letter, fraction, transition } = position;
   const previousVerse = highlighted?.split(':')[0];
   for (const marker of markers.values()) marker.hidden = true;
   const paragraph = paragraphs.get(letter.verse);
@@ -220,7 +233,15 @@ function lessonMarker(time) {
   const parent = rows.get(letter.verse).getBoundingClientRect();
   const marker = markers.get(letter.verse);
   // Arabic runs right-to-left; each glyph's real rectangle also handles wrapped lines.
-  const x = rect.right - fraction * rect.width;
+  let x = rect.right - fraction * rect.width;
+  if (transition) {
+    const fromRange = document.createRange();
+    fromRange.setStart(paragraph.firstChild, transition.from.offset);
+    fromRange.setEnd(paragraph.firstChild, transition.from.offset + transition.from.length);
+    const from = fromRange.getBoundingClientRect();
+    // Do not draw a diagonal jump across wrapped lines.
+    if (Math.abs(from.top - rect.top) < 1) x = from.left + transition.fraction * (rect.right - from.left);
+  }
   Object.assign(marker.style, { left: `${x - parent.left - 2.5}px`, top: `${rect.top - parent.top}px`, width: '5px', height: `${rect.height}px` });
   marker.classList.add('estimated');
   marker.hidden = false;
@@ -558,7 +579,7 @@ audio.addEventListener('ended', () => {
   if (wasLesson) $('phase').textContent = 'Şimdi sıra sende! Sen de tekrar et.';
 });
 audio.addEventListener('error', () => {
-  stop(); $('phase').textContent = 'Ses yüklenemedi. 001.mp3 dosyasını ve yerel sunucuyu kontrol edin.';
+  stop(); $('phase').textContent = `Ses yüklenemedi. ${currentReciter.audio} dosyasını ve yerel sunucuyu kontrol edin.`;
   $('listen').disabled = true; $('repeat').disabled = true; $('repeat-verse').disabled = true;
 });
 
@@ -670,8 +691,8 @@ function updateMemoryAvailability() {
     renderMemoryParts();
     buildTalimSteps(previewWords, audioInfo, selected, memoryMode, memoryPartSelection(), memoryRepetitions);
     $('start-memory').disabled = false;
-    $('memory-availability').textContent = '';
-    $('memory-availability').hidden = true;
+    $('memory-availability').textContent = activeSurah.id === 105 ? 'Kelime zamanları otomatik hizalandı; öğretmen kontrolü önerilir.' : '';
+    $('memory-availability').hidden = activeSurah.id !== 105;
   } catch (error) {
     $('start-memory').disabled = true;
     $('memory-availability').textContent = error.message;
@@ -709,7 +730,7 @@ function renderMemorySession() {
   renderMemoryTurns(step);
   const teachers = memorySession.steps.filter(value => value.role === 'teacher');
   const verseIndex = teachers.findIndex(value => value.key === step.key);
-  const label = memorySession.mode === 'full' ? 'Fatiha’nın tamamı' : `${step.verse}. ayet${step.part ? ` · ${step.part}/${step.totalParts} ${memorySession.mode === 'many' ? 'küçük' : 'orta'} adım` : ''}`;
+  const label = memorySession.mode === 'full' ? `${activeSurah.name} Suresi’nin tamamı` : `${step.verse}. ayet${step.part ? ` · ${step.part}/${step.totalParts} ${memorySession.mode === 'many' ? 'küçük' : 'orta'} adım` : ''}`;
   $('memory-part-text').hidden = !step.text;
   $('memory-part-text').textContent = step.text ? displayArabic(step.text) : '';
   rows.forEach((row, id) => { row.hidden = !step.verses.includes(id); row.classList.toggle('selected', step.verses.includes(id)); });
@@ -794,7 +815,54 @@ function moveMemoryVerse(delta) {
 $('memory-next').addEventListener('click', () => {
   if (memorySession?.waitingNext) { moveMemoryVerse(1); $('listen').focus(); }
 });
-function exitMemory() {
+function showPage(page, { focus = true } = {}) {
+  const home = page === 'home';
+  $('home').hidden = !home;
+  $('lesson').hidden = home;
+  document.title = home ? 'Talim · Sureler' : `Talim · ${activeSurah.name} · ${page === 'memory' ? 'Ezberle' : 'Dinle'}`;
+  if (focus) {
+    (home ? $('home-listen') : $('lesson-title')).focus({ preventScroll: true });
+    window.scrollTo(0, 0);
+  }
+}
+function navigatePage(page) {
+  const hash = page === 'home' ? '' : page === 'memory' ? '#ezber' : '#dinle';
+  if (location.hash !== hash) history.pushState(null, '', `${location.pathname}${location.search}${hash}`);
+  showPage(page);
+}
+function restorePage({ focus = true } = {}) {
+  stop();
+  if ($('memory-dialog').open) $('memory-dialog').close();
+  if (location.hash === '#ezber' && memorySession) {
+    showPage('memory', { focus });
+    return;
+  }
+  exitMemory(false);
+  showPage(location.hash === '#dinle' ? 'listen' : 'home', { focus });
+  if (location.hash === '#ezber') openMemory($(activeSurah.id === 105 ? 'home-memory-fil' : 'home-memory'));
+}
+function openSurah(id, page, trigger) {
+  if (activeSurah.id !== id) {
+    location.assign(`./?surah=${id}${page === 'memory' ? '#ezber' : '#dinle'}`);
+    return;
+  }
+  if (page === 'memory') openMemory(trigger);
+  else { exitMemory(false); navigatePage('listen'); }
+}
+for (const [id, suffix] of [[1, ''], [105, '-fil']]) {
+  $(`home-listen${suffix}`).addEventListener('click', () => openSurah(id, 'listen'));
+  const trigger = $(`home-memory${suffix}`);
+  trigger.addEventListener('click', () => openSurah(id, 'memory', trigger));
+}
+document.querySelector('.brand').addEventListener('click', event => {
+  event.preventDefault();
+  stop();
+  exitMemory(false);
+  if ($('memory-dialog').open) $('memory-dialog').close();
+  navigatePage('home');
+});
+window.addEventListener('popstate', () => restorePage());
+function exitMemory(focus = true) {
   if (!memorySession) return;
   stop();
   memorySession = null;
@@ -811,9 +879,11 @@ function exitMemory() {
   $('phase').textContent = 'Hazırsan başlayalım!';
   refreshSegments();
   updateClock();
-  $('open-memory').focus();
+  if (focus) $('open-memory').focus();
 }
-$('open-memory').addEventListener('click', () => {
+let memoryDialogTrigger = $('open-memory');
+function openMemory(trigger) {
+  memoryDialogTrigger = trigger;
   stop();
   selectedMemoryVerses.clear();
   verses.forEach(verse => selectedMemoryVerses.add(verse.id));
@@ -821,12 +891,15 @@ $('open-memory').addEventListener('click', () => {
   updateMemoryAvailability();
   $('memory-setup').hidden = false;
   $('memory-dialog').showModal();
-});
+}
+$('open-memory').addEventListener('click', () => openMemory($('open-memory')));
 $('close-memory').addEventListener('click', () => $('memory-dialog').close());
 $('memory-dialog').addEventListener('keydown', event => {
   if (event.key === 'Escape') { event.preventDefault(); $('memory-dialog').close(); }
 });
-$('memory-dialog').addEventListener('close', () => { if (!memorySession) $('open-memory').focus(); });
+$('memory-dialog').addEventListener('close', () => {
+  if (!memorySession && !memoryDialogTrigger.closest('[hidden]')) memoryDialogTrigger.focus();
+});
 $('start-memory').addEventListener('click', () => {
   try {
     validateProgression(memoryProgression);
@@ -842,11 +915,15 @@ $('start-memory').addEventListener('click', () => {
     $('exit-memory').hidden = false;
     $('open-memory').hidden = true;
     document.querySelector('.lesson').classList.add('memory-active');
+    navigatePage('memory');
     void runMemoryStep();
     $('listen').focus();
   } catch (error) { $('memory-availability').textContent = error.message; $('memory-availability').hidden = false; }
 });
-$('exit-memory').addEventListener('click', exitMemory);
+$('exit-memory').addEventListener('click', () => {
+  exitMemory(false);
+  navigatePage('listen');
+});
 document.addEventListener('visibilitychange', () => {
   if (document.hidden && gapActive) {
     stop();
@@ -1103,7 +1180,7 @@ $('export').addEventListener('click', () => {
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
-  link.href = url; link.download = 'fatiha-zamanlama.json'; link.hidden = true;
+  link.href = url; link.download = `${activeSurah.id}-${currentReciter.id}-zamanlama.json`; link.hidden = true;
   document.body.append(link); link.click(); link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 30000);
   showMessage('JSON indirme istendi. İndirme başlamazsa aşağıdaki JSON metnini kopyalayarak saklayın.');
@@ -1123,18 +1200,119 @@ $('import').addEventListener('change', async event => {
   finally { event.target.value = ''; }
 });
 
+function closeReciterOptions(focus = false) {
+  $('reciter-options').hidden = true;
+  $('listening-reciter').setAttribute('aria-expanded', 'false');
+  if (focus) $('listening-reciter').focus();
+}
+function openReciterOptions(focus = false) {
+  if (audioLoading) return;
+  $('reciter-options').hidden = false;
+  $('listening-reciter').setAttribute('aria-expanded', 'true');
+  if (focus) $('reciter-options').querySelector('[aria-pressed="true"]')?.focus();
+}
+function updateReciterControls() {
+  $('reciter-value').textContent = currentReciter.label;
+  $('listening-reciter').disabled = audioLoading;
+  if (audioLoading) closeReciterOptions();
+  document.querySelectorAll('[data-listening-reciter]').forEach(button => {
+    button.disabled = audioLoading;
+    button.setAttribute('aria-pressed', String(button.dataset.listeningReciter === currentReciter.id));
+  });
+  document.querySelectorAll('[data-memory-reciter]').forEach(button => {
+    const reciter = reciters.find(reciter => reciter.id === button.dataset.memoryReciter);
+    button.hidden = !reciter;
+    if (reciter) button.textContent = reciter.label;
+    button.disabled = audioLoading || !reciter;
+    button.setAttribute('aria-pressed', String(button.dataset.memoryReciter === currentReciter.id));
+  });
+}
+async function changeReciter(id) {
+  if (audioLoading || currentReciter.id === id) return;
+  audioLoading = true;
+  updateReciterControls();
+  const wasMemorizing = Boolean(memorySession);
+  stop();
+  exitMemory(false);
+  if (wasMemorizing) navigatePage('listen');
+  audio.playbackRate = 1;
+  await saveQueue;
+  currentReciter = reciterById(id, activeSurah.id);
+  selectedMemoryParts = null;
+  chosenPlayback = null;
+  segmentIndex = 0;
+  audio.currentTime = 0;
+  await initializeAudio();
+}
+for (const reciter of reciters) {
+  const option = document.createElement('button');
+  option.type = 'button';
+  option.dataset.listeningReciter = reciter.id;
+  option.textContent = reciter.label;
+  option.setAttribute('aria-pressed', String(reciter.id === currentReciter.id));
+  option.addEventListener('click', () => {
+    closeReciterOptions(true);
+    void changeReciter(reciter.id);
+  });
+  $('reciter-options').append(option);
+}
+$('listening-reciter').addEventListener('click', () => {
+  if ($('reciter-options').hidden) openReciterOptions();
+  else closeReciterOptions();
+});
+$('listening-reciter').addEventListener('keydown', event => {
+  if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+    event.preventDefault();
+    openReciterOptions(true);
+  }
+});
+const reciterChoice = $('listening-reciter').closest('.reciter-choice');
+reciterChoice.addEventListener('keydown', event => {
+  if (event.key === 'Escape') { event.preventDefault(); closeReciterOptions(true); return; }
+  const options = [...$('reciter-options').querySelectorAll('button')];
+  const index = options.indexOf(event.target);
+  if (index < 0 || !['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+  event.preventDefault();
+  const next = event.key === 'Home' ? 0 : event.key === 'End' ? options.length - 1
+    : (index + (event.key === 'ArrowDown' ? 1 : -1) + options.length) % options.length;
+  options[next].focus();
+});
+reciterChoice.addEventListener('focusout', event => {
+  if (!reciterChoice.contains(event.relatedTarget)) closeReciterOptions();
+});
+document.addEventListener('click', event => {
+  if (!reciterChoice.contains(event.target)) closeReciterOptions();
+});
+document.querySelectorAll('[data-memory-reciter]').forEach(button => {
+  button.addEventListener('click', () => void changeReciter(button.dataset.memoryReciter));
+});
 async function initializeAudio() {
+  audioLoading = true;
+  audioInfo = null;
+  timings = [];
+  previewWords = [];
+  previewSilences = [];
+  timingApiAvailable = false;
+  $('word-preview').disabled = true;
+  $('save-state').classList.remove('error');
+  updateReciterControls();
+  updateAlignment();
   try {
     const configResponse = await fetch('./site-config.json');
     if (!configResponse.ok) throw new Error('Yayın yapılandırması okunamadı.');
     const config = await configResponse.json();
     if (!['api', 'static'].includes(config.timingStorage)) throw new Error('Yayın yapılandırması geçerli değil.');
+    if (audioObjectUrl) { URL.revokeObjectURL(audioObjectUrl); audioObjectUrl = null; }
     const metadata = new Promise((resolve, reject) => {
-      if (audio.readyState >= 1) return resolve();
-      audio.addEventListener('loadedmetadata', resolve, { once: true });
-      audio.addEventListener('error', () => reject(new Error('Ses kaydı okunamadı.')), { once: true });
+      const cleanup = () => { audio.removeEventListener('loadedmetadata', loaded); audio.removeEventListener('error', failed); };
+      const loaded = () => { cleanup(); resolve(); };
+      const failed = () => { cleanup(); reject(new Error('Ses kaydı okunamadı.')); };
+      audio.addEventListener('loadedmetadata', loaded, { once: true });
+      audio.addEventListener('error', failed, { once: true });
     });
-    const [response] = await Promise.all([fetch('./001.mp3'), metadata]);
+    audio.src = `./${currentReciter.audio}`;
+    audio.load();
+    const [response] = await Promise.all([fetch(`./${currentReciter.audio}`), metadata]);
     if (!response.ok) throw new Error('Ses dosyası bulunamadı.');
     const buffer = await response.arrayBuffer();
     let sha256;
@@ -1160,7 +1338,7 @@ async function initializeAudio() {
     for (const id of ['seek-time', 'start-time', 'end-time']) $(id).max = audio.duration;
     void wave.decode(buffer).catch(() => { showMessage('Ses dalgası çizilemedi; dinleyip işaretleme düğmeleriyle eşleştirebilirsiniz.', true); });
     try {
-      const savedResponse = await fetch(config.timingStorage === 'static' ? './timings.json' : './api/timings');
+      const savedResponse = await fetch(config.timingStorage === 'static' ? `./${currentReciter.timings}` : timingEndpoint());
       if (!savedResponse.ok) throw new Error('Kayıt dosyası okunamadı.');
       const saved = await savedResponse.json();
       timings = validateTimingDocument(saved, audioInfo);
@@ -1171,16 +1349,18 @@ async function initializeAudio() {
       $('save-state').classList.add('error');
     }
     try {
-      const previewResponse = await fetch('./word-preview.json');
+      const previewResponse = await fetch(`./${currentReciter.words}`);
       if (!previewResponse.ok) throw new Error('Kelime önizlemesi bulunamadı.');
       previewWords = validateWordPreview(await previewResponse.json(), audioInfo);
       if (!previewWords.length) throw new Error('Kelime önizlemesi boş.');
-      const silenceResponse = await fetch('./preview-silence.json');
+      const silenceResponse = await fetch(`./${currentReciter.silence}`);
       if (!silenceResponse.ok) throw new Error('Sessizlik verisi yüklenemedi.');
       previewSilences = validatePreviewSilences(await silenceResponse.json(), audioInfo);
-      const finalResponse = await fetch('./final-preview.json');
-      if (!finalResponse.ok) throw new Error('Son kelime önizlemesi yüklenemedi.');
-      previewWords = applyPreviewOverrides(previewWords, await finalResponse.json(), audioInfo);
+      if (currentReciter.overrides) {
+        const finalResponse = await fetch(`./${currentReciter.overrides}`);
+        if (!finalResponse.ok) throw new Error('Son kelime önizlemesi yüklenemedi.');
+        previewWords = applyPreviewOverrides(previewWords, await finalResponse.json(), audioInfo);
+      }
       $('word-preview').disabled = false;
     } catch (error) {
       previewWords = [];
@@ -1191,6 +1371,12 @@ async function initializeAudio() {
     selectLetter(selectedId);
     updateAlignment(); updateClock();
   } catch (error) { $('phase').textContent = error.message; showMessage(error.message, true); }
+  finally {
+    audioLoading = false;
+    updateReciterControls();
+    updateAlignment();
+    updateClock();
+  }
 }
 window.addEventListener('pagehide', event => {
   if (!event.persisted && audioObjectUrl) URL.revokeObjectURL(audioObjectUrl);
@@ -1201,4 +1387,5 @@ window.addEventListener('resize', () => {
 });
 selectLetter(selectedId);
 updateAlignment();
+restorePage({ focus: false });
 void initializeAudio();

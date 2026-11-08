@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { validateWordPreview, applyPreviewOverrides, validatePreviewSilences, audibleDuration, wordPreviewAt } from '../word-preview.mjs';
 import { parseSilences } from '../scripts/detect-preview-silence.mjs';
+import { createTextModel } from '../quran-text.mjs';
 import { buildTalimSteps, repeatCueTime, memoryTime } from '../memorization.mjs';
 import { alignmentUnits, alignmentUnitFor, hasHaraka, sections } from '../fatiha.mjs';
 const document = JSON.parse(await readFile(new URL('../data/alignment-local-001-verified/word-candidates.json', import.meta.url)));
@@ -32,15 +33,90 @@ test('preparation cue starts at the first real group without advancing normal re
       const word = words.find(word => word.start === step.start);
       assert.ok(word);
       for (const remaining of [0.1, 0.05, 0.001]) {
-        const position = wordPreviewAt(repeatCueTime(step, remaining), words);
+        const position = wordPreviewAt(repeatCueTime(step, remaining), words, [], { start: step.start });
         assert.equal(position.letter.id, word.units[0].id);
         assert.equal(position.fraction, 0);
       }
-      const started = wordPreviewAt(memoryTime(step, 0), words);
+      const started = wordPreviewAt(memoryTime(step, 0), words, [], { start: step.start });
+      assert.equal(started.letter.id, word.units[0].id);
       assert.equal(started.fraction, 0);
-      assert.ok(wordPreviewAt(memoryTime(step, 0.01), words).fraction > 0);
+      assert.ok(wordPreviewAt(memoryTime(step, 0.01), words, [], { start: step.start }).fraction > 0);
     }
   }
+});
+
+function connectedWords(arabic) {
+  const { alignmentUnits } = createTextModel([{ id: 99, arabic }]);
+  return arabic.split(' ').map((text, index) => ({
+    id: `99:${index}`, section: 99, text, start: index ? 1.1 : 0, end: index ? 3 : 1,
+    units: alignmentUnits.filter(unit => unit.word === index),
+  }));
+}
+
+test('shadda connections keep the marker visible and move across the inter-word gap', () => {
+  const words = connectedWords('مِنَ الشَّيْطَانِ');
+  const original = JSON.stringify(words);
+  const atEnd = wordPreviewAt(1, words);
+  assert.equal(atEnd.transition.from.id, words[0].units.at(-1).id);
+  assert.equal(atEnd.transition.fraction, 0);
+  const halfway = wordPreviewAt(1.05, words);
+  assert.equal(halfway.letter.id, words[1].units[0].id);
+  assert.ok(Math.abs(halfway.transition.fraction - .5) < 1e-9);
+  assert.equal(wordPreviewAt(1.1, words).fraction, 0);
+  assert.ok(wordPreviewAt(1.11, words).fraction > 0);
+  assert.equal(JSON.stringify(words), original);
+});
+
+test('connected sukun is traversed with the following vowel, not a separate initial stop', () => {
+  for (const text of ['رَبِّ الْعَالَمِينَ', 'رَبِّ اَلْعَالَمِينَ', 'رَبِّ ٱلْعَالَمِينَ']) {
+    const words = connectedWords(text);
+    const original = JSON.stringify(words);
+    const sukun = words[1].units.find(unit => /\u0652/u.test(unit.text));
+    const next = words[1].units[words[1].units.indexOf(sukun) + 1];
+    const position = wordPreviewAt(1.1, words);
+    assert.equal(position.letter.id, next.id);
+    assert.equal(position.letter.offset, sukun.offset);
+    assert.equal(position.letter.length, next.offset + next.length - sukun.offset);
+    assert.ok(wordPreviewAt(1.15, words).fraction > 0);
+    assert.equal(JSON.stringify(words), original);
+    assert.equal(wordPreviewAt(1.1, words, [], { start: 1.1 }).letter.id, words[1].units[0].id);
+    assert.equal(wordPreviewAt(1.05, words, [], { start: 1.1 }), null);
+  }
+});
+
+test('marked wasl alif is skipped only in connected reading before shadda', () => {
+  const words = connectedWords('مِنَ اَلرَّحْمَنِ');
+  assert.equal(wordPreviewAt(1.1, words).letter.id, words[1].units[1].id);
+  assert.equal(wordPreviewAt(1.1, words, [], { start: 1.1 }).letter.id, words[1].units[0].id);
+});
+
+test('ordinary gaps, verse boundaries, long gaps and measured silence are never bridged', () => {
+  assert.equal(wordPreviewAt(1.05, connectedWords('مِنَ رَبِّ')), null);
+  const pronouncedAlif = connectedWords('الَّذِينَ اَنْعَمْتَ');
+  assert.equal(wordPreviewAt(1.05, pronouncedAlif), null);
+  assert.equal(wordPreviewAt(1.1, pronouncedAlif).letter.id, pronouncedAlif[1].units[0].id);
+  const words = connectedWords('مِنَ الشَّيْطَانِ');
+  const acrossVerse = structuredClone(words);
+  acrossVerse[1].section++;
+  assert.equal(wordPreviewAt(1.05, acrossVerse), null);
+  const longGap = structuredClone(words);
+  longGap[1].start = 1.5;
+  assert.equal(wordPreviewAt(1.2, longGap), null);
+  const silences = [{ start: 1.03, end: 1.07 }];
+  for (const time of [1, 1.02, 1.05, 1.08]) assert.equal(wordPreviewAt(time, words, silences), null);
+  assert.equal(wordPreviewAt(-.01, words), null);
+  assert.equal(wordPreviewAt(words.at(-1).end, words), null);
+});
+
+test('explicit acoustic group ranges retain their timing during connected reading', () => {
+  const words = connectedWords('رَبِّ الْعَالَمِينَ');
+  words[1].groupRanges = words[1].units.map((unit, index) => ({
+    id: unit.id, start: 1.1 + index * .3, end: index === words[1].units.length - 1 ? 3 : 1.1 + (index + 1) * .3,
+  }));
+  const original = JSON.stringify(words);
+  assert.equal(wordPreviewAt(1.05, words).letter.id, words[1].units[0].id);
+  assert.equal(wordPreviewAt(1.15, words).letter.id, words[1].units[0].id);
+  assert.equal(JSON.stringify(words), original);
 });
 
 test('rejects mismatched audio, letter membership, overlap and unresolved candidates', () => {

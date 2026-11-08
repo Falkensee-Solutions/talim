@@ -1,8 +1,9 @@
-import { verses } from './fatiha.mjs';
+import * as activeText from './active-surah.mjs';
+import { verses as fatihaVerses } from './fatiha.mjs';
 import { selectedVerseRanges } from './verse-playback.mjs';
 
 // Recording-independent, editable word-index boundaries. Never split a word or a madd.
-export const studyGroups = {
+const fatihaGroups = {
   medium: {
     1: [[0, 1], [2, 3]],
     2: [[0, 1], [2, 3]],
@@ -23,11 +24,22 @@ export const studyGroups = {
   },
 };
 
-export function buildStudyRanges(words, selectedVerses, duration, mode, selectedParts = null) {
-  const definition = studyGroups[mode];
+function groupsFor(verses) {
+  if (verses === fatihaVerses) return fatihaGroups;
+  return Object.fromEntries(['medium', 'many'].map(mode => [mode, Object.fromEntries(verses.map(verse => {
+    const indexes = verse.arabic.split(/\s+/u).map((_, index) => index);
+    const size = mode === 'medium' ? 2 : 1;
+    return [verse.id, Array.from({ length: Math.ceil(indexes.length / size) }, (_, index) => indexes.slice(index * size, (index + 1) * size))];
+  }))]));
+}
+export const studyGroups = groupsFor(activeText.verses);
+
+export function buildStudyRanges(words, selectedVerses, duration, mode, selectedParts = null, text = activeText) {
+  const { verses } = text;
+  const definition = groupsFor(verses)[mode];
   if (!definition) throw new Error('Geçerli bir adım türü seç.');
-  const ranges = selectedVerseRanges(words, selectedVerses, duration);
-  if (!ranges.length || ranges.some(range => range.verse === 0)) throw new Error('En az bir Fatiha ayeti seç.');
+  const ranges = selectedVerseRanges(words, selectedVerses, duration, text);
+  if (!ranges.length || ranges.some(range => range.verse === 0)) throw new Error('En az bir geçerli sure ayeti seç.');
   const clips = ranges.flatMap(range => {
     const verse = verses.find(verse => verse.id === range.verse);
     const expected = verse.arabic.split(/\s+/u);

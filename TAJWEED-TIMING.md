@@ -52,6 +52,26 @@ görsel sınır değişimi yaklaşık **0,041 saniyedir**; bu sabit bir harf sü
 belirtilmiş görsel kapanış tahmini aynen korunur. Ham zaman dosyaları değiştirilmez.
 Harf grupları ve metin de silinmez veya yeniden yazılmaz.
 
+## Bağlı kelimelerde işaret
+
+[word-preview.mjs](word-preview.mjs), aynı ayette sonraki kelimenin başlangıç
+hareke grubunda şedde veya cezim varsa, en fazla 0,3 saniyelik aday zamanlama
+boşluğunda işareti görünür tutar. Ölçülmüş sessizlikle kesilen geçişler ve ayet
+sınırları birleştirilmez. Bu eşik bir telaffuz hükmü değil, uzun duraklamaları
+köprülememek için görsel bir korumadır. Aynı satırda işaret iki kelime arasındaki
+boşlukta ilerler; satır değişiminde çapraz hareket çizilmez.
+
+Bağlı okumada artikelin yazılı vasıl elifi ayrı bir görsel adım olmaz; başlangıç
+cezimi sonraki harekeli grupla birlikte taranır. Seslendirilen elif (örneğin
+`اَنْعَمْتَ`) atlanmaz. Kelimeye bağımsız başlayan dinleme/ezber tekrarları ilk
+orijinal gruptan başlar. Şeddeli harf atlanmaz; özel `groupRanges` ve kayıtlı
+kelime/harf zamanları değiştirilmez. Bu yalnızca yaklaşık işaret hareketidir,
+yeni ses hizalaması değildir.
+
+Regresyon testleri şedde/cezim geçişini, vasıl ile seslendirilen elif ayrımını,
+sessizlik/ayet/uzun boşluk korumalarını, bağımsız tekrar başlangıcını ve özel
+akustik aralıkların korunmasını kapsar.
+
 ## İşaret ve kontroller
 
 Kırmızı işaret artık sivri uç yerine **trapezdir**: genişlik 34 px, yükseklik 16 px;

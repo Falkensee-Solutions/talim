@@ -4,6 +4,8 @@ import { stat, readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { createTimingStore } from './timing-store.mjs';
+import { recitersForSurah, reciterById } from './reciters.mjs';
+import { surahs, surahById } from './active-surah.mjs';
 
 const root = new URL('./', import.meta.url);
 const files = new Map([
@@ -32,6 +34,19 @@ const files = new Map([
   ['/001.mp3', ['001.mp3', 'audio/mpeg']],
 ]);
 
+for (const name of ['reciters.mjs', 'active-surah.mjs', 'fil.mjs', 'quran-text.mjs']) {
+  files.set(`/${name}`, [name, 'text/javascript; charset=utf-8']);
+}
+for (const surah of surahs) {
+  for (const reciter of recitersForSurah(surah.id)) {
+    files.set(`/${reciter.audio}`, [reciter.audio, 'audio/mpeg']);
+    for (const [url, source] of [[reciter.timings, reciter.timingSource], [reciter.words, reciter.wordSource],
+      [reciter.silence, reciter.silenceSource], [reciter.overrides, reciter.overrideSource]]) {
+      if (url) files.set(`/${url}`, [source, 'application/json; charset=utf-8']);
+    }
+  }
+}
+
 export function parseRange(range, size) {
   if (!range) return null;
   const match = /^bytes=(\d*)-(\d*)$/.exec(range);
@@ -42,8 +57,14 @@ export function parseRange(range, size) {
   return { start, end };
 }
 
-export function createServer({ timingPath = fileURLToPath(new URL('data/fatiha-timing.json', root)) } = {}) {
-  const store = createTimingStore({ audioPath: fileURLToPath(new URL('001.mp3', root)), timingPath });
+export function createServer({ timingPath = fileURLToPath(new URL('data/fatiha-timing.json', root)), timingPath2 = fileURLToPath(new URL('data/fatiha-timing-2.json', root)), filTimingPath = fileURLToPath(new URL('data/fil-timing.json', root)) } = {}) {
+  const paths = new Map([['1:1', timingPath], ['1:2', timingPath2], ['105:1', filTimingPath]]);
+  const stores = new Map(surahs.flatMap(surah => recitersForSurah(surah.id).map(reciter => [
+    `${surah.id}:${reciter.id}`, createTimingStore({
+      audioPath: fileURLToPath(new URL(reciter.audio, root)), timingPath: paths.get(`${surah.id}:${reciter.id}`),
+      duration: reciter.duration, text: surah.text,
+    }),
+  ])));
   return http.createServer(async (request, response) => {
     const pathname = new URL(request.url, 'http://localhost').pathname;
     if (pathname === '/api/timings') {
@@ -52,6 +73,13 @@ export function createServer({ timingPath = fileURLToPath(new URL('data/fatiha-t
       response.setHeader('X-Content-Type-Options', 'nosniff');
       const respond = (status, value) => { response.writeHead(status); response.end(JSON.stringify(value)); };
       try {
+        const params = new URL(request.url, 'http://localhost').searchParams;
+        let store;
+        try {
+          const surah = surahById(params.get('surah') ?? 1);
+          const reciter = reciterById(params.get('reciter') ?? '1', surah.id);
+          store = stores.get(`${surah.id}:${reciter.id}`);
+        } catch (error) { respond(400, { error: error.message }); return; }
         if (request.method === 'GET') { respond(200, await store.load()); return; }
         if (request.method !== 'POST') { response.setHeader('Allow', 'GET, POST'); respond(405, { error: 'Yöntem desteklenmiyor.' }); return; }
         const origin = request.headers.origin;
