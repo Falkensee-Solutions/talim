@@ -52,7 +52,9 @@ model çağrısı veya yeni ses işleme yapılmaz.
 
 GitHub Pages, GitHub Actions iş akışıyla yayımlanır. İş akışı Ubuntu 24.04'e
 sabitlenmiştir; `checkout@v6` ve `setup-node@v6` Node.js 24 eylem çalışma zamanını
-kullanır. Projenin test/build adımları için seçilen Node.js sürümü 22 olarak korunur.
+kullanır. Pages adımları `configure-pages@v6`, `upload-pages-artifact@v5` ve
+`deploy-pages@v5` sürümlerindedir. Projenin test/build adımları için seçilen Node.js
+sürümü 22 olarak korunur.
 Derleme ve testlerin temiz checkout'ta çalışması için her sure/hafızın hazır
 zamanlama, kelime adayı ve sessizlik girdileri Git'e dahildir. Yerel ASR ve
 diagnostik klasörlerin tamamı değil, yalnızca gereken oynatma girdileri izlenir.
