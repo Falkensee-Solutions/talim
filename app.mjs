@@ -4,7 +4,7 @@ import { validateWordPreview, applyPreviewOverrides, validatePreviewSilences, wo
 import { versePlaybackRange, selectedVerseRanges } from './verse-playback.mjs';
 import { createWaveform } from './waveform.mjs';
 import { createHoldRecorder } from './hold-timing.mjs';
-import { buildTalimSteps, nextTalimStep, talimGapAfter, REPEAT_GAP_SECONDS, repeatGapRemaining, memoryTime } from './memorization.mjs';
+import { buildTalimSteps, nextTalimStep, talimGapAfter, REPEAT_GAP_SECONDS, validateRepeatGapSeconds, repeatGapRemaining, memoryTime } from './memorization.mjs';
 import { buildStudyRanges } from './study-groups.mjs';
 
 const $ = id => document.getElementById(id);
@@ -40,6 +40,7 @@ let livePlayback = false;
 let liveFinished = false;
 const selectedMemoryVerses = new Set(verses.map(verse => verse.id));
 let memoryRepetitions = 3;
+let memoryGapSeconds = REPEAT_GAP_SECONDS;
 let memoryMode = 'verse';
 let selectedMemoryParts = null;
 let memorySession = null;
@@ -235,25 +236,6 @@ function repetitionDots(count) {
   for (let i = 0; i < count; i++) dots.append(document.createElement('i'));
   return dots;
 }
-function renderRepeatVisual() {
-  const summary = $('memory-repetition-note');
-  summary.replaceChildren();
-  summary.setAttribute('aria-label', `Hoca 1 defa, öğrenci ${memoryRepetitions} defa tekrar eder.`);
-  for (const [icon, name, count] of [['🧑‍🏫', 'Hoca', 1], ['🧒', 'Sen', memoryRepetitions]]) {
-    if (summary.childElementCount) {
-      const arrow = document.createElement('span');
-      arrow.className = 'talim-flow'; arrow.textContent = '→'; arrow.setAttribute('aria-hidden', 'true');
-      summary.append(arrow);
-    }
-    const person = document.createElement('div');
-    person.className = 'talim-person'; person.setAttribute('aria-hidden', 'true');
-    const picture = document.createElement('span'); picture.className = 'talim-person-icon'; picture.textContent = icon;
-    const label = document.createElement('span'); label.className = 'talim-person-name'; label.textContent = name;
-    const number = document.createElement('span'); number.className = 'talim-count'; number.textContent = count;
-    person.append(picture, label, number, repetitionDots(count));
-    summary.append(person);
-  }
-}
 function updateVerseSelection() {
   const selected = [...selectedMemoryVerses].sort((a, b) => a - b);
   const ranges = audioInfo ? selectedVerseRanges(previewWords, selected, audioInfo.duration) : [];
@@ -332,7 +314,7 @@ function stop() {
   $('listen-label').textContent = 'Dinle';
   $('editor-play').textContent = '▶ Sesi dinle';
 }
-function renderRepeatGap(remaining) {
+function renderRepeatGap(remaining, gapSeconds) {
   const seconds = Math.ceil(remaining);
   const gap = $('repeat-gap');
   if (!gap.hidden && gap.dataset.remaining === String(seconds)) return;
@@ -341,13 +323,14 @@ function renderRepeatGap(remaining) {
   gap.setAttribute('aria-label', `${seconds} saniye hazırlanma süresi kaldı.`);
   $('gap-seconds').textContent = seconds;
   $('gap-dots').replaceChildren();
-  for (let i = 0; i < REPEAT_GAP_SECONDS; i++) {
+  for (let i = 0; i < gapSeconds; i++) {
     const dot = document.createElement('span');
     dot.className = `gap-dot${i < seconds ? ' is-remaining' : ''}`;
     $('gap-dots').append(dot);
   }
 }
-function startRepeatGap(onComplete) {
+function startRepeatGap(onComplete, gapSeconds = memorySession?.gapSeconds ?? REPEAT_GAP_SECONDS) {
+  validateRepeatGapSeconds(gapSeconds);
   stop();
   gapActive = true;
   const request = playbackRequest;
@@ -362,13 +345,13 @@ function startRepeatGap(onComplete) {
     audio.currentTime = segments[segmentIndex]?.start || 0;
     updateClock();
   }
-  renderRepeatGap(REPEAT_GAP_SECONDS);
+  renderRepeatGap(gapSeconds, gapSeconds);
   $('phase').textContent = 'Hazırlan…';
   $('listen-icon').textContent = 'Ⅱ';
   $('listen-label').textContent = 'Duraklat';
   const gapTick = now => {
     if (request !== playbackRequest || !gapActive) return;
-    const remaining = repeatGapRemaining((now - started) / 1000);
+    const remaining = repeatGapRemaining((now - started) / 1000, gapSeconds);
     if (remaining <= 0) {
       gapActive = false;
       $('repeat-gap').hidden = true;
@@ -376,7 +359,7 @@ function startRepeatGap(onComplete) {
       onComplete();
       return;
     }
-    renderRepeatGap(remaining);
+    renderRepeatGap(remaining, gapSeconds);
     frame = requestAnimationFrame(gapTick);
   };
   frame = requestAnimationFrame(gapTick);
@@ -553,6 +536,15 @@ for (const button of document.querySelectorAll('[data-memory-repetitions]')) {
     updateMemoryAvailability();
   });
 }
+for (const button of document.querySelectorAll('[data-memory-gap]')) {
+  button.addEventListener('click', () => {
+    memoryGapSeconds = Number(button.dataset.memoryGap);
+    document.querySelectorAll('[data-memory-gap]').forEach(option => {
+      option.setAttribute('aria-pressed', String(Number(option.dataset.memoryGap) === memoryGapSeconds));
+    });
+    updateMemoryAvailability();
+  });
+}
 function memoryPartSelection() { return selectedMemoryParts === null ? null : [...selectedMemoryParts]; }
 function renderMemoryParts() {
   const stepped = ['medium', 'many'].includes(memoryMode);
@@ -590,21 +582,19 @@ function renderMemoryParts() {
   }
 }
 function updateMemoryAvailability() {
-  renderRepeatVisual();
   try {
     if (!audioInfo) throw new Error('Ses bilgisi yükleniyor…');
+    validateRepeatGapSeconds(memoryGapSeconds);
     const selected = [...selectedMemoryVerses].filter(id => id > 0);
     renderMemoryParts();
-    const steps = buildTalimSteps(previewWords, audioInfo, selected, memoryMode, memoryPartSelection(), memoryRepetitions);
+    buildTalimSteps(previewWords, audioInfo, selected, memoryMode, memoryPartSelection(), memoryRepetitions);
     $('start-memory').disabled = false;
-    $('memory-mode-help').textContent = memoryMode === 'full'
-      ? `Tam: hoca Fatiha’nın tamamını 1 defa okur, sen tamamını ${memoryRepetitions} defa tekrar edersin.`
-      : memoryMode === 'verse' ? `Ayet ayet: her seçili ayette hoca 1 defa, sen ${memoryRepetitions} defa. Sonraki ayete kendin geçersin.`
-        : `${memoryMode === 'many' ? 'Küçük' : 'Orta'} adımlar: her seçili adımda hoca 1 defa, sen ${memoryRepetitions} defa. Sonraki adıma kendin geçersin.`;
-    $('memory-availability').textContent = `${memoryMode === 'full' ? 7 : selected.length} ayet · ${steps.length / (memoryRepetitions + 1)} bölüm · Hoca 1, öğrenci ${memoryRepetitions} · Yaklaşık eşleşmeler.`;
+    $('memory-availability').textContent = '';
+    $('memory-availability').hidden = true;
   } catch (error) {
     $('start-memory').disabled = true;
     $('memory-availability').textContent = error.message;
+    $('memory-availability').hidden = false;
   }
 }
 function renderMemoryTime(time) {
@@ -619,12 +609,7 @@ function renderMemoryTurns(step) {
   const visual = $('memory-turn-visual');
   const complete = memorySession.waitingNext || memorySession.finished;
   visual.replaceChildren();
-  visual.setAttribute('aria-label', memorySession.inGap ? 'Sonraki tekrar için hazırlan.' : step.role === 'teacher' ? 'Hoca bir defa okuyor.' : `Öğrenci ${step.repetition}/${memorySession.repetitions} tekrar${complete ? ' tamamlandı' : ''}.`);
-  const teacher = document.createElement('span');
-  teacher.className = `turn-person${step.role === 'teacher' ? ' is-current' : ''}`;
-  teacher.textContent = '🧑‍🏫'; teacher.setAttribute('aria-hidden', 'true');
-  const arrow = document.createElement('span'); arrow.textContent = '→'; arrow.setAttribute('aria-hidden', 'true');
-  const learner = document.createElement('span'); learner.className = 'turn-person'; learner.textContent = '🧒'; learner.setAttribute('aria-hidden', 'true');
+  visual.setAttribute('aria-label', memorySession.inGap ? 'Sonraki tekrar için hazırlan.' : step.role === 'teacher' ? 'Dinleniyor.' : `${step.repetition}/${memorySession.repetitions} tekrar${complete ? ' tamamlandı' : ''}.`);
   const dots = document.createElement('span'); dots.className = 'turn-dots'; dots.setAttribute('aria-hidden', 'true');
   for (let i = 1; i <= memorySession.repetitions; i++) {
     const dot = document.createElement('span');
@@ -635,7 +620,7 @@ function renderMemoryTurns(step) {
     dot.textContent = done ? '✓' : i;
     dots.append(dot);
   }
-  visual.append(teacher, arrow, learner, dots);
+  visual.append(dots);
 }
 function renderMemorySession() {
   if (!memorySession) return;
@@ -649,8 +634,8 @@ function renderMemorySession() {
   rows.forEach((row, id) => { row.hidden = !step.verses.includes(id); row.classList.toggle('selected', step.verses.includes(id)); });
   $('memory-step-label').textContent = memorySession.finished ? 'Ezber turu tamamlandı!' : memorySession.inGap ? `${label} · Hazırlan` : memorySession.waitingNext
     ? `${label} · ${memorySession.repetitions} tekrar tamamlandı. Hazır olunca sonraki bölüme geç.` : step.role === 'teacher'
-      ? `${label} · Hoca 1 defa okuyor`
-      : `${label} · Şimdi sıra sende · ${step.repetition}/${memorySession.repetitions}. tekrar`;
+      ? `${label} · Dinle`
+      : `${label} · ${step.repetition}/${memorySession.repetitions}. tekrar`;
   $('memory-session').classList.toggle('child-turn', step.role === 'child' && !memorySession.finished && !memorySession.inGap);
   $('previous').disabled = verseIndex === 0;
   $('next').disabled = !memorySession.waitingNext;
@@ -696,14 +681,14 @@ async function runMemoryStep() {
 }
 function finishMemoryStep() {
   if (!memorySession) return;
-  const gap = talimGapAfter(memorySession.steps, memorySession.index, memorySession.mode);
+  const gap = talimGapAfter(memorySession.steps, memorySession.index, memorySession.mode, memorySession.gapSeconds);
   stop();
   Object.assign(memorySession, nextTalimStep(memorySession.steps, memorySession.index, memorySession.mode));
   if (memorySession.waitingNext || memorySession.finished) {
     renderMemorySession();
     renderMemoryTime(memorySession.steps[memorySession.index].end);
-    $('phase').textContent = memorySession.finished ? `Aferin! Hoca 1 defa, sen ${memorySession.repetitions} defa tekrar ettin.` : `${memorySession.repetitions} tekrar tamamlandı. Sonraki bölüme kendin geçebilirsin.`;
-  } else if (gap) startRepeatGap(() => { void runMemoryStep(); });
+    $('phase').textContent = memorySession.finished ? 'Ezber turu tamamlandı.' : `${memorySession.repetitions} tekrar tamamlandı.`;
+  } else if (gap) startRepeatGap(() => { void runMemoryStep(); }, gap);
   else void runMemoryStep();
 }
 function restartMemoryVerse() {
@@ -753,10 +738,11 @@ $('memory-dialog').addEventListener('keydown', event => {
 $('memory-dialog').addEventListener('close', () => { if (!memorySession) $('open-memory').focus(); });
 $('start-memory').addEventListener('click', () => {
   try {
+    validateRepeatGapSeconds(memoryGapSeconds);
     const steps = buildTalimSteps(previewWords, audioInfo, [...selectedMemoryVerses].filter(id => id > 0), memoryMode, memoryPartSelection(), memoryRepetitions);
     stop();
     chosenPlayback = null;
-    memorySession = { steps, index: 0, repetitions: memoryRepetitions, mode: memoryMode, finished: false, waitingNext: false, inGap: false };
+    memorySession = { steps, index: 0, repetitions: memoryRepetitions, gapSeconds: memoryGapSeconds, mode: memoryMode, finished: false, waitingNext: false, inGap: false };
     $('memory-dialog').close();
     updateVerseSelection();
     $('memory-setup').hidden = true;
@@ -764,7 +750,7 @@ $('start-memory').addEventListener('click', () => {
     document.querySelector('.lesson').classList.add('memory-active');
     void runMemoryStep();
     $('listen').focus();
-  } catch (error) { $('memory-availability').textContent = error.message; }
+  } catch (error) { $('memory-availability').textContent = error.message; $('memory-availability').hidden = false; }
 });
 $('exit-memory').addEventListener('click', exitMemory);
 document.addEventListener('visibilitychange', () => {

@@ -10,7 +10,7 @@ export const staticAssets = [
   'index.html', 'style.css', 'waveform.css', 'hold-timing.css', 'memorization.css',
   'app.mjs', 'fatiha.mjs', 'timing.mjs', 'word-preview.mjs', 'tajweed-timing.mjs', 'verse-playback.mjs',
   'study-groups.mjs', 'memorization.mjs', 'waveform.mjs', 'hold-timing.mjs', '001.mp3',
-  'TalimQuran.ttf', 'Amiri-OFL.txt',
+  'TalimQuran.ttf', 'Hamdullah-NOTICE.txt',
 ];
 
 export async function buildStatic(output = join(root, 'dist')) {

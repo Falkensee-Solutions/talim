@@ -22,7 +22,7 @@ kopyalanmadı; aşağıdaki notlar uygulama kapsamındaki kısa teknik çıkarı
 | [Mukattaa](https://tecvid.org/8-ders-hurufu-mukattaanin-okunusu/), [zamir hâ](https://tecvid.org/9-ders-zamir-he-nin-uzatilmasi/) | Özel harf adları ve bağlamsal uzatmalar; Fatiha’daki her hâ veya çıplak harfe bu kurallar uygulanmaz. |
 | [Lafzatullah](https://tecvid.org/10-ders-lafzatullah/), [râ](https://tecvid.org/11-ders-ranin-okunusu/) | Öncelikle ince/kalın söyleyiş hükümleri; tek başına bir süre çarpanı değildir. |
 | [Vakıf](https://tecvid.org/18-ders-vakif-ve-isaretleri/) | Durma ve geçme aynı değildir; ârız medde 2/4/6 seçenekleri bulunur. Kayıtta seçilen vecih metinden kesin belirlenmediği için otomatik 4 veya 6 atanmaz. |
-| [Sekte](https://tecvid.org/19-ders-sekte/), [tilavet secdesi](https://tecvid.org/28-ders-tilavet-secdesi/) | Fatiha’ya rastgele yeni sessizlik veya secde süresi eklenmez. Mevcut sesin sessizlikleri ve ayrı 5 saniyelik öğretim araları korunur. |
+| [Sekte](https://tecvid.org/19-ders-sekte/), [tilavet secdesi](https://tecvid.org/28-ders-tilavet-secdesi/) | Fatiha’ya rastgele yeni sessizlik veya secde süresi eklenmez. Mevcut sesin sessizlikleri korunur. Ayrı tekrar araları varsayılan 3 saniyedir; ezber ekranının İnce ayarlar bölümünde 1–5 saniye seçilebilir. |
 
 **Belirsizlik:** Sakin mîm dersinin gövdesinde iki hareke, alt notunda yaklaşık üç
 hareke ifadeleri bulunuyor. Bu fark seçilip kayda zorla uygulanmadı. Gunne,

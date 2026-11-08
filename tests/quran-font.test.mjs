@@ -56,11 +56,12 @@ test('Quran font retains shaping tables and covers every displayed Arabic charac
 
 test('vowels and shadda are red; stop marks including small seen are purple', () => {
   const cpal = tables.get('CPAL');
-  assert.equal(u16(cpal + 2), 4);
+  assert.equal(u16(cpal + 2), 2);
   const colors = cpal + u32(cpal + 8);
-  for (let index = 0; index < 4; index++) {
-    assert.deepEqual([...font.subarray(colors + index * 4, colors + index * 4 + 4)], index === 3 ? [152, 60, 125, 255] : [50, 35, 180, 255]);
+  for (let index = 0; index < 2; index++) {
+    assert.deepEqual([...font.subarray(colors + index * 4, colors + index * 4 + 4)], index === 1 ? [152, 60, 125, 255] : [50, 35, 180, 255]);
   }
   for (const code of [0x064e, 0x064f, 0x0650, 0x0651, 0x0652, 0x0670]) assert.deepEqual(colorsFor(code), [0]);
-  for (const code of [0x06d6, 0x06d7, 0x06d8, 0x06d9, 0x06da, 0x06dc]) assert.deepEqual(colorsFor(code), [3]);
+  for (const code of [0x06d6, 0x06d7, 0x06d8, 0x06d9, 0x06da, 0x06dc]) assert.deepEqual(colorsFor(code), [1]);
+  for (const code of [0x0628, 0x062a, 0x062b, 0x062c, 0x062e, 0x0646, 0x064a]) assert.deepEqual(colorsFor(code), []);
 });

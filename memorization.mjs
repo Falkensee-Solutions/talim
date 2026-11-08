@@ -53,15 +53,22 @@ export function nextTalimStep(steps, index, mode) {
   return { index: index + 1, finished: false, waitingNext: false };
 }
 
-export const REPEAT_GAP_SECONDS = 5;
+export const REPEAT_GAP_SECONDS = 3;
 
-export function talimGapAfter(steps, index, mode) {
-  const next = nextTalimStep(steps, index, mode);
-  return !next.finished && !next.waitingNext && steps[next.index].role === 'child' ? REPEAT_GAP_SECONDS : 0;
+export function validateRepeatGapSeconds(seconds) {
+  if (!Number.isInteger(seconds) || seconds < 1 || seconds > 5) throw new Error('Tekrar arası 1 ile 5 saniye arasında olmalı.');
+  return seconds;
 }
 
-export function repeatGapRemaining(elapsedSeconds) {
-  return Math.max(0, REPEAT_GAP_SECONDS - Math.max(0, elapsedSeconds));
+export function talimGapAfter(steps, index, mode, gapSeconds = REPEAT_GAP_SECONDS) {
+  validateRepeatGapSeconds(gapSeconds);
+  const next = nextTalimStep(steps, index, mode);
+  return !next.finished && !next.waitingNext && steps[next.index].role === 'child' ? gapSeconds : 0;
+}
+
+export function repeatGapRemaining(elapsedSeconds, gapSeconds = REPEAT_GAP_SECONDS) {
+  validateRepeatGapSeconds(gapSeconds);
+  return Math.max(0, gapSeconds - Math.max(0, elapsedSeconds));
 }
 
 export function memoryTime(step, elapsedSeconds) {

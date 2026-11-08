@@ -1,0 +1,11 @@
+Shaikh Hamdullah Mushaf
+Designer: Muhammet Abay
+Copyright (c) 2011 by Muhammet Abay. All rights reserved.
+
+Source: https://acikkuran.com/1
+Original font: https://acikkuran.com/_next/static/media/ShaikhHamdullahMushaf-s.p.14rbbrrdwyp57.ttf
+Original SHA-256: e5b532183829b5ee91bd8a32c5362683d094cddca2094d1976fdc417be412974
+
+The project owner confirmed permission to use and redistribute this font with Talim on 2026-11-08. No general public license for the font is asserted by this notice.
+
+The bundled TalimQuran.ttf is a display variant named Talim Hamdullah. Original outlines, character mappings, GPOS and GSUB tables are retained. COLR/CPAL tables color vowel marks and their contextual variants #B42332 and stop signs #7D3C98. Letter outlines and letter dots use the text foreground color.

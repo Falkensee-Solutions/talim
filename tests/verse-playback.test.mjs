@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { validateWordPreview, applyPreviewOverrides } from '../word-preview.mjs';
 import { versePlaybackRange, selectedVerseRanges, repeatAtBoundary } from '../verse-playback.mjs';
-import { buildTalimSteps, nextTalimStep, talimGapAfter, REPEAT_GAP_SECONDS, repeatGapRemaining } from '../memorization.mjs';
+import { buildTalimSteps, nextTalimStep, talimGapAfter, REPEAT_GAP_SECONDS, validateRepeatGapSeconds, repeatGapRemaining } from '../memorization.mjs';
 const source = JSON.parse(await readFile(new URL('../data/alignment-local-001-verified/word-candidates.json', import.meta.url)));
 const override = JSON.parse(await readFile(new URL('../data/final-phrase-local/preview-overrides.json', import.meta.url)));
 const audio = { ...source.audio, duration: 54.220125 };
@@ -98,20 +98,32 @@ test('all Talim modes support one teacher and 1, 3, 5 or 7 students per verse or
   }
 });
 
-test('five-second preparation follows teacher and each student except manual next or completion', () => {
-  assert.equal(REPEAT_GAP_SECONDS, 5);
+test('configurable preparation defaults to three seconds and skips manual next or completion', () => {
+  assert.equal(REPEAT_GAP_SECONDS, 3);
   for (const mode of ['full', 'verse', 'medium', 'many']) for (const count of [1, 3, 5, 7]) {
     const steps = buildTalimSteps(words, audio, [3, 7], mode, null, count);
-    for (let index = 0; index < steps.length; index++) {
-      const next = nextTalimStep(steps, index, mode);
-      const expected = next.finished || next.waitingNext ? 0 : 5;
-      assert.equal(talimGapAfter(steps, index, mode), expected);
+    assert.equal(talimGapAfter(steps, 0, mode), 3);
+    for (const seconds of [1, 2, 3, 4, 5]) {
+      for (let index = 0; index < steps.length; index++) {
+        const next = nextTalimStep(steps, index, mode);
+        const expected = next.finished || next.waitingNext ? 0 : seconds;
+        assert.equal(talimGapAfter(steps, index, mode, seconds), expected);
+      }
+      assert.equal(repeatGapRemaining(0, seconds), seconds);
+      assert.equal(repeatGapRemaining(-1, seconds), seconds);
+      assert.ok(repeatGapRemaining(seconds - 0.001, seconds) > 0);
+      assert.equal(repeatGapRemaining(seconds, seconds), 0);
+      assert.equal(repeatGapRemaining(10, seconds), 0);
     }
-    assert.equal(talimGapAfter(steps, 0, mode), 5);
   }
-  assert.equal(repeatGapRemaining(0), 5);
-  assert.equal(repeatGapRemaining(-1), 5);
-  assert.ok(repeatGapRemaining(4.999) > 0);
-  assert.equal(repeatGapRemaining(5), 0);
-  assert.equal(repeatGapRemaining(10), 0);
+  assert.equal(repeatGapRemaining(0), 3);
+});
+
+test('repeat gap rejects durations outside integer one to five seconds', () => {
+  const steps = buildTalimSteps(words, audio, [1]);
+  for (const seconds of [0, -1, 6, 1.5, NaN, Infinity, '3', null]) {
+    assert.throws(() => validateRepeatGapSeconds(seconds));
+    assert.throws(() => talimGapAfter(steps, 0, 'verse', seconds));
+    assert.throws(() => repeatGapRemaining(0, seconds));
+  }
 });

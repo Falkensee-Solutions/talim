@@ -5,16 +5,19 @@
 - Ayetleri seçerek dinleme ve sürekli tekrar.
 - Tam, ayet ayet, orta adımlar ve kelime kelime çalışma.
 - Hoca bir kez okur; öğrenci 1, 3, 5 veya 7 kez sessiz tekrar eder.
-- Tekrarlar arasında 5 saniye hazırlık süresi; öğrenci turunda görsel takip.
+- Ezber ekranındaki İnce ayarlar: tekrar sayısı (varsayılan 3), tekrar arası (1–5 saniye, varsayılan 3) ve mevcut kayıt için Hafız 1. Üçü de yan yana seçim düğmeleriyle gösterilir.
+- Tekrar sırasında görsel takip; hoca/öğrenci ikonları ve açıklama metinleri gösterilmez. Normal dinlemedeki hazırlık süresi de varsayılan 3 saniyedir.
 - Sağ üstteki görünüm ayarları: Türkçe okunuş, takip işareti ve kaynak/lisans bilgisi.
 - Alt açıklama ve footer gösterilmez; oynatma durumu yalnızca ekran okuyuculara duyurulur.
 - Ayet numaraları yalnızca yandaki seçim düğmelerinde gösterilir; Eûzü başlangıcı elif (ا) ile işaretlenir.
 - Ayet alanları düz köşelidir; solda seçim çizgisi yoktur. Alanlar arasında ortalanmış, %90 genişliğinde ince bir alt çizgi bulunur; son alanın altında çizgi gösterilmez.
-- Arapça metin yerel Talim Quran yazı tipiyle gösterilir: harekeler ve şedde kırmızı, durak işaretleri mor. Harf birleşimleri ve üst üste gelen harekeler yazı tipinin Kur’an dizgisiyle yerleştirilir; metin ve ses eşleşme konumları değiştirilmez.
+- Arapça metin Açık Kuran’daki Shaikh Hamdullah Mushaf yazı tipiyle gösterilir: harfler ve noktaları siyah, harekeler ve şedde kırmızı, durak işaretleri mor. Metin ve ses eşleşme konumları değiştirilmez.
 
 ### Arapça yazı tipi
 
-`TalimQuran.ttf`, [Amiri Quran Colored 1.003](https://github.com/aliftype/amiri/releases/tag/1.003) türevidir. SIL Open Font License 1.1 metni `Amiri-OFL.txt` içinde dağıtılır. Aile adı Talim Quran olarak değiştirilmiştir; CPAL paletindeki 0–2 renkleri `#B42332`, 3. renk `#7D3C98` yapılmıştır. U+06DC küçük sîn/durak işaretinin COLR katmanı da 3. renge taşınmıştır. Glif şekilleri, GPOS hareke yerleşimleri ve GSUB harf birleşimleri korunmuştur. Yazı tipi siteyle birlikte sunulur; harici bir yazı tipi servisine istek yapılmaz.
+`TalimQuran.ttf`, [Açık Kuran](https://acikkuran.com/1) tarafından kullanılan **Shaikh Hamdullah Mushaf** (Muhammet Abay, 2011) yazı tipinin Talim Hamdullah adlı renkli görünüm sürümüdür. Proje sahibi kullanım ve siteyle dağıtım iznini doğrulamıştır; fontun genel bir açık lisansa sahip olduğu iddia edilmez. Kaynak, özgün dosyanın SHA-256 özeti ve telif bilgisi `Hamdullah-NOTICE.txt` içinde korunur ve Ayarlar’dan açılır.
+
+Glif şekilleri, karakter eşleştirmeleri, GPOS hareke yerleşimleri ve GSUB harf birleşimleri değiştirilmez. Eklenen COLR/CPAL katmanları yalnızca harekeleri (bağlama göre kullanılan alternatifleriyle birlikte) `#B42332`, durakları `#7D3C98` yapar. Harflerin kendi noktaları siyah kalır. Yazı tipi yerel dosyadan sunulur; harici yazı tipi servisine istek yapılmaz.
 
 **Deneme sürümüdür.** Takip işareti yaklaşık zamanlamalar kullanır; harf/tecvid
 uygunluğu veya çocuğun okuması otomatik değerlendirilmez. Mikrofon kullanılmaz.

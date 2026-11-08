@@ -12,7 +12,7 @@ const files = new Map([
   ['/site-config.json', ['site-config.json', 'application/json; charset=utf-8']],
   ['/style.css', ['style.css', 'text/css; charset=utf-8']],
   ['/TalimQuran.ttf', ['TalimQuran.ttf', 'font/ttf']],
-  ['/Amiri-OFL.txt', ['Amiri-OFL.txt', 'text/plain; charset=utf-8']],
+  ['/Hamdullah-NOTICE.txt', ['Hamdullah-NOTICE.txt', 'text/plain; charset=utf-8']],
   ['/waveform.css', ['waveform.css', 'text/css; charset=utf-8']],
   ['/waveform.mjs', ['waveform.mjs', 'text/javascript; charset=utf-8']],
   ['/hold-timing.mjs', ['hold-timing.mjs', 'text/javascript; charset=utf-8']],

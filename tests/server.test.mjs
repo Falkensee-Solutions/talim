@@ -35,7 +35,14 @@ test('serves app and seekable audio without exposing arbitrary files', async t =
   assert.match(settings, /CC BY-NC-SA 4\.0/);
   assert.match(html, /id="toggle-reading" type="checkbox"/);
   assert.match(html, /id="word-preview" type="checkbox"/);
-  assert.match(html, /class="talim-visual"/);
+  assert.match(html, /<details class="memory-fine-settings">/);
+  assert.match(html, /<summary>İnce ayarlar<\/summary>/);
+  assert.match(html, /data-memory-repetitions="3"[^>]*aria-pressed="true"/);
+  assert.match(html, /data-memory-gap="3"[^>]*aria-pressed="true"/);
+  assert.equal((html.match(/data-memory-gap="[1-5]"/g) || []).length, 5);
+  assert.match(html, /data-memory-reciter="1" aria-pressed="true">Hafız 1<\/button>/);
+  assert.doesNotMatch(html, /<select id="memory-gap-seconds"|<select id="memory-reciter"/);
+  assert.doesNotMatch(html, /memory-repetition-note|memory-mode-help|memory-help|Hoca bir|Sen kaç|Senin turunda/);
   assert.match(html, /class="verse-chips"/);
   assert.match(html, /id="open-editor" class="quiet" hidden/);
   assert.match(html, /id="repeat-gap"[^>]*hidden/);
@@ -46,7 +53,7 @@ test('serves app and seekable audio without exposing arbitrary files', async t =
   assert.equal(font.status, 200);
   assert.equal(font.headers.get('content-type'), 'font/ttf');
   assert.equal((await font.arrayBuffer()).byteLength, (await stat(new URL('../TalimQuran.ttf', import.meta.url))).size);
-  assert.match(await (await fetch(`${base}/Amiri-OFL.txt`)).text(), /SIL OPEN FONT LICENSE/);
+  assert.match(await (await fetch(`${base}/Hamdullah-NOTICE.txt`)).text(), /Shaikh Hamdullah Mushaf[\s\S]*Muhammet Abay/);
   assert.match(html, /rel="preload" href="\.\/TalimQuran.ttf" as="font"/);
   const preview = await fetch(`${base}/word-preview.json`);
   assert.equal(preview.status, 200);

@@ -21,7 +21,7 @@ test('Pages build publishes a validated, read-only allowlist and original audio 
   assert.equal(JSON.parse(await readFile(join(output, 'final-preview.json'))).overrides.length, 3);
   assert.deepEqual(await readFile(join(output, '001.mp3')), await readFile(new URL('../001.mp3', import.meta.url)));
   assert.deepEqual(await readFile(join(output, 'TalimQuran.ttf')), await readFile(new URL('../TalimQuran.ttf', import.meta.url)));
-  assert.match(await readFile(join(output, 'Amiri-OFL.txt'), 'utf8'), /SIL OPEN FONT LICENSE/);
+  assert.match(await readFile(join(output, 'Hamdullah-NOTICE.txt'), 'utf8'), /Shaikh Hamdullah Mushaf[\s\S]*Muhammet Abay/);
   assert.ok(!files.some(file => /server|\.env|asr|diagnostic|requirements/.test(file)));
   assert.match(await readFile(join(output, 'index.html'), 'utf8'), /src="\.\/app\.mjs"/);
 });

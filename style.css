@@ -18,6 +18,6 @@
 .repeat-gap{display:flex;align-items:center;justify-content:center;gap:14px;min-height:58px;margin:12px 0;padding:8px 14px;border-radius:16px;background:#fff3d6;color:#765719}.gap-icon{font-size:28px}.gap-seconds{width:40px;height:40px;display:grid;place-items:center;border:2px solid #e1bd68;border-radius:50%;font-size:26px;font-weight:800;background:#fff}.gap-dots{display:flex;gap:7px}.gap-dot{width:13px;height:13px;border-radius:50%;background:#e8dcc4}.gap-dot.is-remaining{background:#b78324}.turn-dot.is-next{border-style:dashed;background:#f5f8f3}
 .topbar-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px}
 .book-icon{display:block;width:22px;height:22px;flex-shrink:0}.brand-icon .book-icon{width:28px;height:28px}
-@font-face{font-family:"Talim Quran";src:url("./TalimQuran.ttf") format("truetype");font-style:normal;font-weight:400;font-display:swap}
-.arabic,.editor-arabic,.letter-picker button,#selected-letter,.memory-part-text{font-family:"Talim Quran","Noto Naskh Arabic","Traditional Arabic",serif;font-weight:400;font-synthesis:none}
+@font-face{font-family:"Talim Hamdullah";src:url("./TalimQuran.ttf") format("truetype");font-style:normal;font-weight:400;font-display:swap}
+.arabic,.editor-arabic,.letter-picker button,#selected-letter,.memory-part-text{font-family:"Talim Hamdullah","Noto Naskh Arabic","Traditional Arabic",serif;font-weight:400;font-synthesis:none;color:#202020}
 .arabic,.editor-arabic,.memory-part-text{line-height:2.4}
