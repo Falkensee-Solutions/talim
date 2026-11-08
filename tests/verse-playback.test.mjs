@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { validateWordPreview, applyPreviewOverrides } from '../word-preview.mjs';
 import { versePlaybackRange, selectedVerseRanges, repeatAtBoundary } from '../verse-playback.mjs';
-import { buildTalimSteps, nextTalimStep, talimGapAfter, REPEAT_GAP_SECONDS, validateRepeatGapSeconds, repeatGapRemaining } from '../memorization.mjs';
+import { buildTalimSteps, nextTalimStep, talimGapAfter, REPEAT_GAP_SECONDS, REPEAT_GAP_OPTIONS, DEFAULT_PROGRESSION, validateProgression, validateRepeatGapSeconds, repeatGapRemaining } from '../memorization.mjs';
 const source = JSON.parse(await readFile(new URL('../data/alignment-local-001-verified/word-candidates.json', import.meta.url)));
 const override = JSON.parse(await readFile(new URL('../data/final-phrase-local/preview-overrides.json', import.meta.url)));
 const audio = { ...source.audio, duration: 54.220125 };
@@ -98,12 +98,13 @@ test('all Talim modes support one teacher and 1, 3, 5 or 7 students per verse or
   }
 });
 
-test('configurable preparation defaults to three seconds and skips manual next or completion', () => {
-  assert.equal(REPEAT_GAP_SECONDS, 3);
+test('configurable preparation defaults to one and a half seconds and skips manual next or completion', () => {
+  assert.equal(REPEAT_GAP_SECONDS, 1.5);
+  assert.deepEqual(REPEAT_GAP_OPTIONS, [0.5, 1, 1.5, 2, 3, 4, 5]);
   for (const mode of ['full', 'verse', 'medium', 'many']) for (const count of [1, 3, 5, 7]) {
     const steps = buildTalimSteps(words, audio, [3, 7], mode, null, count);
-    assert.equal(talimGapAfter(steps, 0, mode), 3);
-    for (const seconds of [1, 2, 3, 4, 5]) {
+    assert.equal(talimGapAfter(steps, 0, mode), 1.5);
+    for (const seconds of REPEAT_GAP_OPTIONS) {
       for (let index = 0; index < steps.length; index++) {
         const next = nextTalimStep(steps, index, mode);
         const expected = next.finished || next.waitingNext ? 0 : seconds;
@@ -116,12 +117,41 @@ test('configurable preparation defaults to three seconds and skips manual next o
       assert.equal(repeatGapRemaining(10, seconds), 0);
     }
   }
-  assert.equal(repeatGapRemaining(0), 3);
+  assert.equal(repeatGapRemaining(0), 1.5);
+  assert.equal(repeatGapRemaining(0.25, 0.5), 0.25);
+  assert.equal(repeatGapRemaining(0.75, 1.5), 0.75);
 });
 
-test('repeat gap rejects durations outside integer one to five seconds', () => {
+test('automatic progression advances in order; manual progression waits between parts', () => {
+  assert.equal(DEFAULT_PROGRESSION, 'auto');
+  for (const mode of ['full', 'verse', 'medium', 'many']) for (const count of [1, 3, 5, 7]) {
+    const steps = buildTalimSteps(words, audio, [1, 2], mode, null, count);
+    for (let index = 0; index < steps.length; index++) {
+      const final = index === steps.length - 1;
+      const auto = nextTalimStep(steps, index, mode, 'auto');
+      assert.deepEqual(auto, { index: final ? index : index + 1, finished: final, waitingNext: false });
+      assert.equal(talimGapAfter(steps, index, mode, 1.5, 'auto'), final ? 0 : 1.5);
+      const waits = !final && mode !== 'full' && steps[index + 1].role === 'teacher';
+      assert.deepEqual(nextTalimStep(steps, index, mode, 'manual'), {
+        index: final || waits ? index : index + 1, finished: final, waitingNext: waits,
+      });
+      assert.equal(talimGapAfter(steps, index, mode, 1.5, 'manual'), final || waits ? 0 : 1.5);
+    }
+  }
+});
+
+test('invalid progression cannot start or advance a session', () => {
   const steps = buildTalimSteps(words, audio, [1]);
-  for (const seconds of [0, -1, 6, 1.5, NaN, Infinity, '3', null]) {
+  for (const progression of ['unknown', '', null, true]) {
+    assert.throws(() => validateProgression(progression));
+    assert.throws(() => nextTalimStep(steps, 0, 'verse', progression));
+    assert.throws(() => talimGapAfter(steps, 0, 'verse', 1.5, progression));
+  }
+});
+
+test('repeat gap rejects durations outside the supported options', () => {
+  const steps = buildTalimSteps(words, audio, [1]);
+  for (const seconds of [0, -1, 6, 0.25, 0.75, 2.5, NaN, Infinity, '1.5', null]) {
     assert.throws(() => validateRepeatGapSeconds(seconds));
     assert.throws(() => talimGapAfter(steps, 0, 'verse', seconds));
     assert.throws(() => repeatGapRemaining(0, seconds));

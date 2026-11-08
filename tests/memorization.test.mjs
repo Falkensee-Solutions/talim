@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { alignmentUnits } from '../fatiha.mjs';
 import { ALIGNMENT_VERSION } from '../timing.mjs';
-import { buildMemorizationSteps, memoryTime } from '../memorization.mjs';
+import { buildMemorizationSteps, REPEAT_CUE_LEAD_SECONDS, REPEAT_GAP_OPTIONS, repeatCueTime, repeatGapRemaining, repeatGapFraction, memoryTime } from '../memorization.mjs';
 
 const audio = { sha256: 'test', duration: 60 };
 const fixture = selected => ({ version: 1, alignment: ALIGNMENT_VERSION, audio, timings: alignmentUnits.filter(letter => selected.includes(letter.verse)).map((letter, index) => ({ id: letter.id, start: index * .1, end: index * .1 + .08, reviewed: true })) });
@@ -37,6 +37,32 @@ test('rejects empty selection, non-verses, wrong audio and invalid repeat counts
   for (const count of [0, 2, 4, 6]) assert.throws(() => buildMemorizationSteps(fixture([1]), audio, [1], count));
   assert.throws(() => buildMemorizationSteps(fixture([1]), { ...audio, sha256: 'wrong' }, [1], 1));
 });
+test('repeat cue holds the first position only during the final tenth of the preparation gap', () => {
+  assert.equal(REPEAT_CUE_LEAD_SECONDS, 0.1);
+  const step = Object.freeze({ role: 'child', start: 10, end: 15 });
+  for (const remaining of [0.1, 0.10000000000000009, 0.08, 0.01]) assert.equal(repeatCueTime(step, remaining), 10);
+  for (const remaining of [1.5, 0.101, 0, -0.01, NaN, Infinity]) assert.equal(repeatCueTime(step, remaining), null);
+  assert.equal(repeatCueTime({ ...step, role: 'teacher' }, 0.05), null);
+  assert.equal(repeatCueTime(undefined, 0.05), null);
+  assert.equal(memoryTime(step, 0), 10);
+  assert.equal(memoryTime(step, 0.1), 10.1);
+  assert.deepEqual(step, { role: 'child', start: 10, end: 15 });
+});
+
+test('fixed-length waiting bar shrinks continuously at the selected duration', () => {
+  for (const duration of REPEAT_GAP_OPTIONS) {
+    assert.equal(repeatGapFraction(repeatGapRemaining(0, duration), duration), 1);
+    assert.equal(repeatGapFraction(repeatGapRemaining(duration / 4, duration), duration), 0.75);
+    assert.equal(repeatGapFraction(repeatGapRemaining(duration / 2, duration), duration), 0.5);
+    assert.equal(repeatGapFraction(repeatGapRemaining(duration, duration), duration), 0);
+    assert.equal(repeatGapFraction(duration + 1, duration), 1);
+    assert.equal(repeatGapFraction(-1, duration), 0);
+  }
+  assert.ok(repeatGapFraction(repeatGapRemaining(0.2, 0.5), 0.5)
+    < repeatGapFraction(repeatGapRemaining(0.2, 5), 5));
+  assert.throws(() => repeatGapFraction(1, 0));
+});
+
 test('silent cursor time follows the original pace and stops exactly at verse end', () => {
   const step = { start: 10, end: 15 };
   assert.equal(memoryTime(step, 0), 10);

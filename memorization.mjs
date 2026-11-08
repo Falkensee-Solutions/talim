@@ -45,30 +45,51 @@ export function buildTalimSteps(words, audio, selectedVerses, mode = 'verse', se
   ]);
 }
 
-export function nextTalimStep(steps, index, mode) {
+export const DEFAULT_PROGRESSION = 'auto';
+
+export function validateProgression(progression) {
+  if (!['auto', 'manual'].includes(progression)) throw new Error('Geçiş Otomatik veya Manuel olmalı.');
+  return progression;
+}
+
+export function nextTalimStep(steps, index, mode, progression = 'manual') {
+  validateProgression(progression);
   if (index + 1 >= steps.length) return { index, finished: true, waitingNext: false };
-  if (mode !== 'full' && steps[index + 1].role === 'teacher') {
+  if (progression === 'manual' && mode !== 'full' && steps[index + 1].role === 'teacher') {
     return { index, finished: false, waitingNext: true };
   }
   return { index: index + 1, finished: false, waitingNext: false };
 }
 
-export const REPEAT_GAP_SECONDS = 3;
+export const REPEAT_CUE_LEAD_SECONDS = 0.1;
+
+export function repeatCueTime(step, remainingSeconds) {
+  return step?.role === 'child' && remainingSeconds > 0
+    && remainingSeconds <= REPEAT_CUE_LEAD_SECONDS + 1e-9 ? step.start : null;
+}
+
+export const REPEAT_GAP_SECONDS = 1.5;
+export const REPEAT_GAP_OPTIONS = [0.5, 1, 1.5, 2, 3, 4, 5];
 
 export function validateRepeatGapSeconds(seconds) {
-  if (!Number.isInteger(seconds) || seconds < 1 || seconds > 5) throw new Error('Tekrar arası 1 ile 5 saniye arasında olmalı.');
+  if (!REPEAT_GAP_OPTIONS.includes(seconds)) throw new Error('Tekrar arası 0,5; 1; 1,5; 2; 3; 4 veya 5 saniye olmalı.');
   return seconds;
 }
 
-export function talimGapAfter(steps, index, mode, gapSeconds = REPEAT_GAP_SECONDS) {
+export function talimGapAfter(steps, index, mode, gapSeconds = REPEAT_GAP_SECONDS, progression = 'manual') {
   validateRepeatGapSeconds(gapSeconds);
-  const next = nextTalimStep(steps, index, mode);
-  return !next.finished && !next.waitingNext && steps[next.index].role === 'child' ? gapSeconds : 0;
+  const next = nextTalimStep(steps, index, mode, progression);
+  return !next.finished && !next.waitingNext ? gapSeconds : 0;
 }
 
 export function repeatGapRemaining(elapsedSeconds, gapSeconds = REPEAT_GAP_SECONDS) {
   validateRepeatGapSeconds(gapSeconds);
   return Math.max(0, gapSeconds - Math.max(0, elapsedSeconds));
+}
+
+export function repeatGapFraction(remainingSeconds, gapSeconds = REPEAT_GAP_SECONDS) {
+  validateRepeatGapSeconds(gapSeconds);
+  return Math.max(0, Math.min(1, remainingSeconds / gapSeconds));
 }
 
 export function memoryTime(step, elapsedSeconds) {

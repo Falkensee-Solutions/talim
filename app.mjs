@@ -4,7 +4,7 @@ import { validateWordPreview, applyPreviewOverrides, validatePreviewSilences, wo
 import { versePlaybackRange, selectedVerseRanges } from './verse-playback.mjs';
 import { createWaveform } from './waveform.mjs';
 import { createHoldRecorder } from './hold-timing.mjs';
-import { buildTalimSteps, nextTalimStep, talimGapAfter, REPEAT_GAP_SECONDS, validateRepeatGapSeconds, repeatGapRemaining, memoryTime } from './memorization.mjs';
+import { buildTalimSteps, nextTalimStep, talimGapAfter, REPEAT_GAP_SECONDS, DEFAULT_PROGRESSION, validateProgression, validateRepeatGapSeconds, repeatGapRemaining, repeatGapFraction, repeatCueTime, memoryTime } from './memorization.mjs';
 import { buildStudyRanges } from './study-groups.mjs';
 
 const $ = id => document.getElementById(id);
@@ -17,6 +17,8 @@ const verseChoices = new Map();
 let chosenPlayback = null;
 let listeningSession = false;
 let gapActive = false;
+let repeatCueActive = false;
+let repeatGapAnimation = null;
 let timings = [];
 let audioInfo = null;
 let timingApiAvailable = false;
@@ -38,9 +40,11 @@ const holdRecorder = createHoldRecorder();
 let holdInput = null;
 let livePlayback = false;
 let liveFinished = false;
+const selectedListeningVerses = new Set(verses.map(verse => verse.id));
 const selectedMemoryVerses = new Set(verses.map(verse => verse.id));
 let memoryRepetitions = 3;
 let memoryGapSeconds = REPEAT_GAP_SECONDS;
+let memoryProgression = DEFAULT_PROGRESSION;
 let memoryMode = 'verse';
 let selectedMemoryParts = null;
 let memorySession = null;
@@ -51,6 +55,40 @@ const wave = createWaveform({
   onEdit() { $('reviewed').checked = false; },
   onToggle() { $('editor-play').click(); },
 });
+
+function setVerseChoiceLabel(element, id) {
+  if (id > 0) { element.textContent = id; return; }
+  const ns = 'http://www.w3.org/2000/svg';
+  const icon = document.createElementNS(ns, 'svg');
+  icon.classList.add('introduction-icon');
+  icon.setAttribute('viewBox', '0 0 64 64');
+  icon.setAttribute('aria-hidden', 'true');
+  icon.setAttribute('focusable', 'false');
+  for (let petal = 0; petal < 8; petal++) {
+    const outline = document.createElementNS(ns, 'path');
+    outline.setAttribute('d', 'M25 21 Q24 12 32 3 Q40 12 39 21');
+    outline.setAttribute('transform', `rotate(${petal * 45} 32 32)`);
+    outline.setAttribute('fill', 'none');
+    outline.setAttribute('stroke', 'currentColor');
+    outline.setAttribute('stroke-width', '2.5');
+    const inner = document.createElementNS(ns, 'path');
+    inner.setAttribute('d', 'M29 21 Q29 17 32 15 Q35 17 35 21 Z');
+    inner.setAttribute('transform', `rotate(${petal * 45} 32 32)`);
+    inner.setAttribute('fill', 'currentColor');
+    icon.append(outline, inner);
+  }
+  const ring = document.createElementNS(ns, 'circle');
+  ring.setAttribute('cx', '32'); ring.setAttribute('cy', '32');
+  ring.setAttribute('r', '10');
+  ring.setAttribute('fill', 'none');
+  ring.setAttribute('stroke', 'currentColor');
+  ring.setAttribute('stroke-width', '5');
+  const center = document.createElementNS(ns, 'circle');
+  center.setAttribute('cx', '32'); center.setAttribute('cy', '32');
+  center.setAttribute('r', '3'); center.setAttribute('fill', 'currentColor');
+  icon.append(ring, center);
+  element.replaceChildren(icon);
+}
 
 for (const verse of sections) {
   const row = document.createElement('section');
@@ -71,9 +109,9 @@ for (const verse of sections) {
   const choice = document.createElement('button');
   choice.className = 'verse-choice';
   choice.type = 'button';
-  choice.textContent = verse.id || 'ا';
+  setVerseChoiceLabel(choice, verse.id);
   choice.setAttribute('aria-label', `${sectionLabel(verse.id)} seç`);
-  choice.setAttribute('aria-pressed', String(selectedMemoryVerses.has(verse.id)));
+  choice.setAttribute('aria-pressed', String(selectedListeningVerses.has(verse.id)));
   choice.disabled = true;
   choice.addEventListener('click', () => toggleVerseSelection(verse.id));
   verseChoices.set(verse.id, choice);
@@ -163,13 +201,13 @@ function highlight(id) {
   }
 }
 function lessonMarker(time) {
-  if (gapActive || !$('word-preview').checked) { clearMarker(); return; }
+  if ((gapActive && !repeatCueActive) || !$('word-preview').checked) { clearMarker(); return; }
   if (!previewWords.length || dialog.open) {
     previewTime = null;
     highlight(activeLetter(time, timings));
     return;
   }
-  const position = wordPreviewAt(time, previewWords, previewSilences);
+  const position = wordPreviewAt(time, previewWords, repeatCueActive ? [] : previewSilences);
   if (!position) { clearMarker(); return; }
   const { letter, fraction } = position;
   const previousVerse = highlighted?.split(':')[0];
@@ -218,16 +256,20 @@ function updateClock() {
 }
 function toggleVerseSelection(id) {
   stop();
+  if (selectedListeningVerses.has(id)) selectedListeningVerses.delete(id);
+  else selectedListeningVerses.add(id);
+  chosenPlayback = null;
+  segmentIndex = 0;
+  updateVerseSelection();
+  refreshSegments();
+  $('phase').textContent = 'Yalnızca seçtiğin ayetler dinlenecek.';
+}
+function toggleMemoryVerseSelection(id) {
   if (selectedMemoryVerses.has(id)) selectedMemoryVerses.delete(id);
   else selectedMemoryVerses.add(id);
   if (memoryMode === 'full') memoryMode = 'verse';
   selectedMemoryParts = null;
-  chosenPlayback = null;
-  segmentIndex = 0;
-  updateVerseSelection();
   updateMemoryAvailability();
-  refreshSegments();
-  $('phase').textContent = 'Yalnızca seçtiğin ayetler dinlenecek.';
 }
 function repetitionDots(count) {
   const dots = document.createElement('span');
@@ -237,37 +279,49 @@ function repetitionDots(count) {
   return dots;
 }
 function updateVerseSelection() {
-  const selected = [...selectedMemoryVerses].sort((a, b) => a - b);
+  const selected = [...selectedListeningVerses].sort((a, b) => a - b);
   const ranges = audioInfo ? selectedVerseRanges(previewWords, selected, audioInfo.duration) : [];
   const summary = $('selected-verse-label');
   summary.replaceChildren();
   const accessible = document.createElement('span'); accessible.className = 'sr-only';
+  accessible.setAttribute('role', 'status');
   accessible.textContent = selected.length ? `${selected.map(sectionLabel).join(' · ')} seçili` : 'En az bir ayet seç.';
   summary.append(accessible);
-  for (const verse of sections.filter(verse => verse.id > 0 || selectedMemoryVerses.has(0))) {
-    const chip = document.createElement('span');
-    const chosen = selectedMemoryVerses.has(verse.id);
+  for (const verse of sections) {
+    const chip = document.createElement('button');
+    const chosen = selectedListeningVerses.has(verse.id);
+    chip.type = 'button';
     chip.className = `verse-chip${chosen ? ' is-selected' : ''}`;
-    chip.dataset.verse = verse.id; chip.setAttribute('aria-hidden', 'true');
+    chip.dataset.verse = verse.id;
+    chip.setAttribute('aria-label', `${sectionLabel(verse.id)} seç`);
+    chip.setAttribute('aria-pressed', String(chosen));
+    chip.disabled = Boolean(memorySession) || !audioInfo || !versePlaybackRange(previewWords, verse.id, audioInfo.duration);
     chip.title = `${sectionLabel(verse.id)} · ${chosen ? 'Seçili' : 'Seçili değil'}`;
-    chip.textContent = verse.id || 'ا';
-    if (chosen) { const check = document.createElement('small'); check.textContent = '✓'; chip.append(check); }
+    setVerseChoiceLabel(chip, verse.id);
+    if (chosen) { const check = document.createElement('small'); check.textContent = '✓'; check.setAttribute('aria-hidden', 'true'); chip.append(check); }
+    chip.addEventListener('click', () => {
+      toggleVerseSelection(verse.id);
+      document.querySelector(`.verse-chip[data-verse="${verse.id}"]`)?.focus({ preventScroll: true });
+    });
     summary.append(chip);
   }
   for (const [id, button] of verseChoices) {
     button.disabled = Boolean(memorySession) || !audioInfo || !versePlaybackRange(previewWords, id, audioInfo.duration);
-    button.setAttribute('aria-pressed', String(selectedMemoryVerses.has(id)));
-    rows.get(id).classList.toggle('chosen', selectedMemoryVerses.has(id));
+    button.setAttribute('aria-pressed', String(selectedListeningVerses.has(id)));
+    rows.get(id).classList.toggle('chosen', selectedListeningVerses.has(id));
   }
+  $('play-from-verse').disabled = !ranges.length || Boolean(memorySession);
+  $('loop-verse').disabled = !ranges.length || Boolean(memorySession);
+}
+function updateMemoryVerseSelection() {
   for (const button of document.querySelectorAll('[data-memory-verse]')) {
     const id = Number(button.dataset.memoryVerse);
     button.setAttribute('aria-pressed', String(selectedMemoryVerses.has(id)));
-    button.textContent = `${selectedMemoryVerses.has(id) ? '✓ ' : ''}${id}. ayet`;
-    button.disabled = memoryMode === 'full';
+    button.textContent = String(id);
   }
+  $('memory-selection-label').textContent = selectedMemoryVerses.size ? 'Hiçbirini seçme' : 'Hepsini seç';
+  $('toggle-memory-selection').querySelector('.selection-square').classList.toggle('is-selected', selectedMemoryVerses.size === verses.length);
   document.querySelectorAll('[data-memory-mode][aria-pressed]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.memoryMode === memoryMode)));
-  $('play-from-verse').disabled = !ranges.length || Boolean(memorySession);
-  $('loop-verse').disabled = !ranges.length || Boolean(memorySession);
 }
 function startSelectedVerse(repeat) {
   if (memorySession || !audioInfo) return;
@@ -285,7 +339,7 @@ $('stop-playback').addEventListener('click', () => {
 });
 function refreshSegments() {
   if (memorySession) { renderMemorySession(); return; }
-  segments = audioInfo ? selectedVerseRanges(previewWords, [...selectedMemoryVerses], audioInfo.duration).map(range => ({ ...range, title: `${sectionLabel(range.verse)} · Seçili ayetler${chosenPlayback?.repeat ? ' · Sürekli tekrar' : ''}` })) : [];
+  segments = audioInfo ? selectedVerseRanges(previewWords, [...selectedListeningVerses], audioInfo.duration).map(range => ({ ...range, title: `${sectionLabel(range.verse)} · Seçili ayetler${chosenPlayback?.repeat ? ' · Sürekli tekrar' : ''}` })) : [];
   segmentIndex = Math.min(segmentIndex, Math.max(0, segments.length - 1));
   document.querySelectorAll('[data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === mode)));
   $('listen').disabled = !segments.length;
@@ -298,6 +352,9 @@ function refreshSegments() {
 }
 function stop() {
   gapActive = false;
+  repeatCueActive = false;
+  repeatGapAnimation?.cancel();
+  repeatGapAnimation = null;
   $('repeat-gap').hidden = true;
   if (memorySession) memorySession.inGap = false;
   listeningSession = false;
@@ -315,19 +372,13 @@ function stop() {
   $('editor-play').textContent = '▶ Sesi dinle';
 }
 function renderRepeatGap(remaining, gapSeconds) {
-  const seconds = Math.ceil(remaining);
+  const fraction = repeatGapFraction(remaining, gapSeconds);
   const gap = $('repeat-gap');
-  if (!gap.hidden && gap.dataset.remaining === String(seconds)) return;
   gap.hidden = false;
-  gap.dataset.remaining = seconds;
-  gap.setAttribute('aria-label', `${seconds} saniye hazırlanma süresi kaldı.`);
-  $('gap-seconds').textContent = seconds;
-  $('gap-dots').replaceChildren();
-  for (let i = 0; i < gapSeconds; i++) {
-    const dot = document.createElement('span');
-    dot.className = `gap-dot${i < seconds ? ' is-remaining' : ''}`;
-    $('gap-dots').append(dot);
-  }
+  $('repeat-gap-fill').style.transform = `scaleX(${fraction})`;
+  gap.setAttribute('aria-valuenow', (fraction * 100).toFixed(1));
+  const seconds = Math.ceil(remaining * 2) / 2;
+  gap.setAttribute('aria-valuetext', `${seconds.toLocaleString('tr-TR')} saniye kaldı`);
 }
 function startRepeatGap(onComplete, gapSeconds = memorySession?.gapSeconds ?? REPEAT_GAP_SECONDS) {
   validateRepeatGapSeconds(gapSeconds);
@@ -346,6 +397,10 @@ function startRepeatGap(onComplete, gapSeconds = memorySession?.gapSeconds ?? RE
     updateClock();
   }
   renderRepeatGap(gapSeconds, gapSeconds);
+  repeatGapAnimation = $('repeat-gap-fill').animate?.(
+    [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }],
+    { duration: gapSeconds * 1000, easing: 'linear', fill: 'forwards' },
+  ) ?? null;
   $('phase').textContent = 'Hazırlan…';
   $('listen-icon').textContent = 'Ⅱ';
   $('listen-label').textContent = 'Duraklat';
@@ -353,12 +408,17 @@ function startRepeatGap(onComplete, gapSeconds = memorySession?.gapSeconds ?? RE
     if (request !== playbackRequest || !gapActive) return;
     const remaining = repeatGapRemaining((now - started) / 1000, gapSeconds);
     if (remaining <= 0) {
+      renderRepeatGap(0, gapSeconds);
       gapActive = false;
+      repeatCueActive = false;
       $('repeat-gap').hidden = true;
       if (memorySession) memorySession.inGap = false;
       onComplete();
       return;
     }
+    const cueTime = repeatCueTime(memorySession?.steps[memorySession.index], remaining);
+    repeatCueActive = cueTime !== null;
+    if (repeatCueActive) lessonMarker(cueTime);
     renderRepeatGap(remaining, gapSeconds);
     frame = requestAnimationFrame(gapTick);
   };
@@ -504,12 +564,24 @@ audio.addEventListener('error', () => {
 
 for (const verse of verses) {
   const button = document.createElement('button');
+  button.type = 'button';
   button.dataset.memoryVerse = verse.id;
+  button.setAttribute('aria-label', sectionLabel(verse.id));
   button.setAttribute('aria-pressed', 'true');
-  button.textContent = `✓ ${verse.id}. ayet`;
-  button.addEventListener('click', () => toggleVerseSelection(verse.id));
+  button.textContent = String(verse.id);
+  button.addEventListener('click', () => toggleMemoryVerseSelection(verse.id));
   $('memory-verse-picker').append(button);
 }
+$('toggle-memory-selection').addEventListener('click', () => {
+  if (selectedMemoryVerses.size) {
+    selectedMemoryVerses.clear();
+    if (memoryMode === 'full') memoryMode = 'verse';
+  } else {
+    verses.forEach(verse => selectedMemoryVerses.add(verse.id));
+  }
+  selectedMemoryParts = null;
+  updateMemoryAvailability();
+});
 for (const button of document.querySelectorAll('[data-memory-mode][aria-pressed]')) button.addEventListener('click', () => {
   memoryMode = button.dataset.memoryMode;
   selectedMemoryParts = null;
@@ -517,11 +589,7 @@ for (const button of document.querySelectorAll('[data-memory-mode][aria-pressed]
     selectedMemoryVerses.clear();
     verses.forEach(verse => selectedMemoryVerses.add(verse.id));
   }
-  chosenPlayback = null;
-  segmentIndex = 0;
-  updateVerseSelection();
   updateMemoryAvailability();
-  refreshSegments();
 });
 for (const button of document.querySelectorAll('[data-memory-repetitions]')) {
   const count = Number(button.dataset.memoryRepetitions);
@@ -545,6 +613,15 @@ for (const button of document.querySelectorAll('[data-memory-gap]')) {
     updateMemoryAvailability();
   });
 }
+for (const button of document.querySelectorAll('[data-memory-progression]')) {
+  button.addEventListener('click', () => {
+    memoryProgression = button.dataset.memoryProgression;
+    document.querySelectorAll('[data-memory-progression]').forEach(option => {
+      option.setAttribute('aria-pressed', String(option.dataset.memoryProgression === memoryProgression));
+    });
+    updateMemoryAvailability();
+  });
+}
 function memoryPartSelection() { return selectedMemoryParts === null ? null : [...selectedMemoryParts]; }
 function renderMemoryParts() {
   const stepped = ['medium', 'many'].includes(memoryMode);
@@ -556,6 +633,7 @@ function renderMemoryParts() {
   for (const verse of [...new Set(ranges.map(range => range.verse))]) {
     const group = document.createElement('section');
     const title = document.createElement('h3');
+    title.dir = 'ltr';
     title.textContent = `${verse}. ayet`;
     group.append(title);
     for (const range of ranges.filter(range => range.verse === verse)) {
@@ -567,6 +645,7 @@ function renderMemoryParts() {
       const text = document.createElement('span');
       text.lang = 'ar'; text.dir = 'rtl'; text.textContent = displayArabic(range.text);
       const duration = document.createElement('small');
+      duration.dir = 'ltr';
       duration.textContent = `${range.part}. adım · ${(range.end - range.start).toFixed(1)} sn`;
       button.append(text, duration);
       button.addEventListener('click', () => {
@@ -582,8 +661,10 @@ function renderMemoryParts() {
   }
 }
 function updateMemoryAvailability() {
+  updateMemoryVerseSelection();
   try {
     if (!audioInfo) throw new Error('Ses bilgisi yükleniyor…');
+    validateProgression(memoryProgression);
     validateRepeatGapSeconds(memoryGapSeconds);
     const selected = [...selectedMemoryVerses].filter(id => id > 0);
     renderMemoryParts();
@@ -639,7 +720,8 @@ function renderMemorySession() {
   $('memory-session').classList.toggle('child-turn', step.role === 'child' && !memorySession.finished && !memorySession.inGap);
   $('previous').disabled = verseIndex === 0;
   $('next').disabled = !memorySession.waitingNext;
-  $('memory-next').hidden = !memorySession.waitingNext;
+  $('memory-next').hidden = memorySession.mode === 'full' || memorySession.progression === 'auto';
+  $('memory-next').disabled = !memorySession.waitingNext;
   $('memory-next').textContent = step.part ? 'Sonraki adıma geç →' : 'Sonraki ayete geç →';
   $('repeat-verse').disabled = memorySession.mode === 'full';
   $('repeat-verse').title = memorySession.mode === 'full' ? 'Tam modunda Baştan tekrar et düğmesini kullan.' : '';
@@ -664,6 +746,7 @@ async function runMemoryStep() {
     return;
   }
   memoryRunning = true;
+  lessonMarker(step.start);
   $('phase').textContent = `Şimdi sen söyle · ${step.repetition}/${session.repetitions}. tekrar`;
   $('listen-icon').textContent = 'Ⅱ';
   $('listen-label').textContent = 'Duraklat';
@@ -681,9 +764,9 @@ async function runMemoryStep() {
 }
 function finishMemoryStep() {
   if (!memorySession) return;
-  const gap = talimGapAfter(memorySession.steps, memorySession.index, memorySession.mode, memorySession.gapSeconds);
+  const gap = talimGapAfter(memorySession.steps, memorySession.index, memorySession.mode, memorySession.gapSeconds, memorySession.progression);
   stop();
-  Object.assign(memorySession, nextTalimStep(memorySession.steps, memorySession.index, memorySession.mode));
+  Object.assign(memorySession, nextTalimStep(memorySession.steps, memorySession.index, memorySession.mode, memorySession.progression));
   if (memorySession.waitingNext || memorySession.finished) {
     renderMemorySession();
     renderMemoryTime(memorySession.steps[memorySession.index].end);
@@ -718,15 +801,23 @@ function exitMemory() {
   segmentIndex = 0;
   updateVerseSelection();
   $('memory-session').hidden = true;
+  $('memory-next').hidden = true;
+  $('memory-next').disabled = true;
+  $('exit-memory').hidden = true;
+  $('open-memory').hidden = false;
   $('memory-setup').hidden = false;
   document.querySelector('.lesson').classList.remove('memory-active');
   rows.forEach(row => { row.hidden = false; });
   $('phase').textContent = 'Hazırsan başlayalım!';
   refreshSegments();
   updateClock();
+  $('open-memory').focus();
 }
 $('open-memory').addEventListener('click', () => {
   stop();
+  selectedMemoryVerses.clear();
+  verses.forEach(verse => selectedMemoryVerses.add(verse.id));
+  selectedMemoryParts = null;
   updateMemoryAvailability();
   $('memory-setup').hidden = false;
   $('memory-dialog').showModal();
@@ -738,15 +829,18 @@ $('memory-dialog').addEventListener('keydown', event => {
 $('memory-dialog').addEventListener('close', () => { if (!memorySession) $('open-memory').focus(); });
 $('start-memory').addEventListener('click', () => {
   try {
+    validateProgression(memoryProgression);
     validateRepeatGapSeconds(memoryGapSeconds);
     const steps = buildTalimSteps(previewWords, audioInfo, [...selectedMemoryVerses].filter(id => id > 0), memoryMode, memoryPartSelection(), memoryRepetitions);
     stop();
     chosenPlayback = null;
-    memorySession = { steps, index: 0, repetitions: memoryRepetitions, gapSeconds: memoryGapSeconds, mode: memoryMode, finished: false, waitingNext: false, inGap: false };
+    memorySession = { steps, index: 0, repetitions: memoryRepetitions, gapSeconds: memoryGapSeconds, progression: memoryProgression, mode: memoryMode, finished: false, waitingNext: false, inGap: false };
     $('memory-dialog').close();
     updateVerseSelection();
     $('memory-setup').hidden = true;
     $('memory-session').hidden = false;
+    $('exit-memory').hidden = false;
+    $('open-memory').hidden = true;
     document.querySelector('.lesson').classList.add('memory-active');
     void runMemoryStep();
     $('listen').focus();

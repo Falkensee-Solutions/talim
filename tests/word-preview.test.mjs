@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { validateWordPreview, applyPreviewOverrides, validatePreviewSilences, audibleDuration, wordPreviewAt } from '../word-preview.mjs';
 import { parseSilences } from '../scripts/detect-preview-silence.mjs';
+import { buildTalimSteps, repeatCueTime, memoryTime } from '../memorization.mjs';
 import { alignmentUnits, alignmentUnitFor, hasHaraka, sections } from '../fatiha.mjs';
 const document = JSON.parse(await readFile(new URL('../data/alignment-local-001-verified/word-candidates.json', import.meta.url)));
 const audio = { sha256: document.audio.sha256, duration: 54.220125 };
@@ -21,6 +22,25 @@ test('real word candidates yield visual positions without saved letter timestamp
   assert.equal(wordPreviewAt(words.at(-1).end, words), null);
   assert.equal(document.words[0].reviewed, false);
   assert.equal('start' in middle.letter, false);
+});
+
+test('preparation cue starts at the first real group without advancing normal repeat timing', () => {
+  const words = validateWordPreview(document, audio);
+  for (const mode of ['full', 'verse', 'medium', 'many']) {
+    const steps = buildTalimSteps(words, audio, [1, 7], mode);
+    for (const step of steps.filter(step => step.role === 'child')) {
+      const word = words.find(word => word.start === step.start);
+      assert.ok(word);
+      for (const remaining of [0.1, 0.05, 0.001]) {
+        const position = wordPreviewAt(repeatCueTime(step, remaining), words);
+        assert.equal(position.letter.id, word.units[0].id);
+        assert.equal(position.fraction, 0);
+      }
+      const started = wordPreviewAt(memoryTime(step, 0), words);
+      assert.equal(started.fraction, 0);
+      assert.ok(wordPreviewAt(memoryTime(step, 0.01), words).fraction > 0);
+    }
+  }
 });
 
 test('rejects mismatched audio, letter membership, overlap and unresolved candidates', () => {

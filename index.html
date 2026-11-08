@@ -22,23 +22,23 @@
   </header>
   <main>
     <section class="lesson" aria-label="Fatiha öğrenme alanı">
-      <div class="lesson-heading"><div><p class="eyebrow">1. SURE · 7 AYET</p><h1 class="lesson-title">Fatiha Suresi</h1></div><button id="open-memory" class="primary memory-launch" aria-haspopup="dialog"><svg class="book-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 6C9 4 5 4 2 5v14c3-1 7-1 10 1 3-2 7-2 10-1V5c-3-1-7-1-10 1Z"/><path d="M12 6v14"/></svg> Sureyi ezberle</button></div>
+      <div class="lesson-heading"><div><p class="eyebrow">1. SURE · 7 AYET</p><h1 class="lesson-title">Fatiha Suresi</h1></div><button id="open-memory" class="primary memory-launch" aria-haspopup="dialog"><svg class="book-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 6C9 4 5 4 2 5v14c3-1 7-1 10 1 3-2 7-2 10-1V5c-3-1-7-1-10 1Z"/><path d="M12 6v14"/></svg> Sureyi ezberle</button><button id="exit-memory" class="secondary" hidden>Ezber modundan çık</button></div>
       <fieldset class="modes" hidden><legend>Nasıl dinleyelim?</legend>
         <button type="button" data-mode="many" aria-pressed="false" disabled><span aria-hidden="true">▦</span>Çok parçalı<small>Kelime kelime</small></button>
         <button type="button" data-mode="medium" aria-pressed="false" disabled><span aria-hidden="true">▤</span>Orta parçalı<small>Kısa gruplar</small></button>
         <button type="button" data-mode="few" aria-pressed="false" disabled><span aria-hidden="true">▥</span>Az parçalı<small>Ayet ayet</small></button>
         <button type="button" data-mode="full" aria-pressed="true"><span aria-hidden="true">◯</span>Tam<small>Bütün sure</small></button>
       </fieldset>
-      <div id="memory-session" class="memory-session" hidden><span id="memory-step-label" role="status" aria-live="polite"></span><div id="memory-turn-visual" class="memory-turn-visual" role="img"></div><p id="memory-part-text" class="memory-part-text" lang="ar" dir="rtl" hidden></p><button id="memory-next" class="primary" hidden>Sonraki ayete geç →</button><button id="exit-memory" class="secondary">Ezber modundan çık</button></div>
+      <div id="memory-session" class="memory-session" hidden><div class="memory-session-heading"><span id="memory-step-label" role="status" aria-live="polite"></span><div id="memory-turn-visual" class="memory-turn-visual" role="img"></div></div><p id="memory-part-text" class="memory-part-text" lang="ar" dir="rtl" hidden></p></div>
       <div id="verse-controls" class="verse-controls" aria-label="Seçili ayetlerden dinleme">
-        <div id="selected-verse-label" class="verse-chips" role="status"></div>
+        <div id="selected-verse-label" class="verse-chips" role="group" aria-label="Dinlenecek ayetleri seç"></div>
         <button id="play-from-verse" class="secondary icon-action" aria-label="Seçilen ayetleri dinle" title="Seçilen ayetleri dinle" disabled><span aria-hidden="true">▶</span></button>
         <button id="loop-verse" class="secondary icon-action" aria-label="Seçilen ayetleri tekrarla" title="Seçilen ayetleri tekrarla" disabled><span aria-hidden="true">↻</span></button>
       </div>
       <div id="verses" class="verses"></div>
       <div class="player">
         <div class="player-status"><span id="phase" class="sr-only" role="status" aria-live="polite"></span><span id="clock">0:00 / 0:54</span></div>
-        <div id="repeat-gap" class="repeat-gap" role="img" hidden><span class="gap-icon" aria-hidden="true">⌛</span><span id="gap-seconds" class="gap-seconds" aria-hidden="true">3</span><span id="gap-dots" class="gap-dots" aria-hidden="true"></span></div>
+        <div id="repeat-gap" class="repeat-gap" role="progressbar" aria-label="Tekrar arası bekleme" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" hidden><span class="gap-icon" aria-hidden="true">⌛</span><span class="repeat-gap-track" aria-hidden="true"><span id="repeat-gap-fill" class="repeat-gap-fill"></span></span></div>
         <div class="progress" aria-hidden="true"><div id="progress-fill"></div></div>
         <div class="player-buttons">
           <button id="previous" class="secondary" disabled><span aria-hidden="true">←</span><span>Önceki</span></button>
@@ -48,6 +48,7 @@
           <button id="next" class="secondary" disabled><span aria-hidden="true">→</span><span>Sonraki</span></button>
           <button id="stop-playback" class="secondary"><span aria-hidden="true">■</span><span>Durdur</span></button>
         </div>
+        <button id="memory-next" class="primary" hidden disabled>Sonraki ayete geç →</button>
       </div>
     </section>
   </main>
@@ -63,12 +64,13 @@
     <div class="editor-heading"><h2 id="memory-title">Ezber zamanı</h2><button id="close-memory" class="quiet" autofocus>Kapat ✕</button></div>
     <section id="memory-setup" class="memory-setup" aria-label="Ezber ayarları">
       <fieldset class="memory-repetitions"><legend>Nasıl ezberleyelim?</legend><button data-memory-mode="full" aria-pressed="false">Tam · Fatiha’nın tamamı</button><button data-memory-mode="verse" aria-pressed="true">Az parçalı · Ayet ayet</button><button data-memory-mode="medium" aria-pressed="false">Orta adımlar · Kısa gruplar</button><button data-memory-mode="many" aria-pressed="false">Küçük adımlar · Kelime kelime</button></fieldset>
-      <fieldset class="memory-verses"><legend>Seçili ayetler · Dinlemeyle ortak</legend><div id="memory-verse-picker"></div></fieldset>
-      <fieldset id="memory-parts" class="memory-parts" hidden><legend>Hangi adımları çalışalım?</legend><div id="memory-part-picker"></div></fieldset>
+      <fieldset class="memory-verses"><legend class="memory-selection-heading"><span>Seçili ayetler</span><button id="toggle-memory-selection" class="quiet" type="button" aria-controls="memory-verse-picker"><span class="selection-square is-selected" aria-hidden="true"></span><span id="memory-selection-label">Hiçbirini seçme</span></button></legend><div id="memory-verse-picker"></div></fieldset>
+      <fieldset id="memory-parts" class="memory-parts" hidden><legend>Hangi adımları çalışalım?</legend><div id="memory-part-picker" dir="rtl"></div></fieldset>
       <details class="memory-fine-settings">
         <summary>İnce ayarlar</summary>
         <fieldset class="memory-repetitions repeat-options"><legend>Tekrar sayısı</legend><button data-memory-repetitions="1" aria-label="1 defa tekrar et" aria-pressed="false">1</button><button data-memory-repetitions="3" aria-label="3 defa tekrar et" aria-pressed="true">3</button><button data-memory-repetitions="5" aria-label="5 defa tekrar et" aria-pressed="false">5</button><button data-memory-repetitions="7" aria-label="7 defa tekrar et" aria-pressed="false">7</button></fieldset>
-        <fieldset id="memory-gap-seconds" class="memory-repetitions"><legend>Tekrar arası</legend><button type="button" data-memory-gap="1" aria-label="1 saniye" aria-pressed="false">1 sn</button><button type="button" data-memory-gap="2" aria-label="2 saniye" aria-pressed="false">2 sn</button><button type="button" data-memory-gap="3" aria-label="3 saniye" aria-pressed="true">3 sn</button><button type="button" data-memory-gap="4" aria-label="4 saniye" aria-pressed="false">4 sn</button><button type="button" data-memory-gap="5" aria-label="5 saniye" aria-pressed="false">5 sn</button></fieldset>
+        <fieldset id="memory-gap-seconds" class="memory-repetitions"><legend>Tekrar arası (saniye)</legend><button type="button" data-memory-gap="0.5" aria-label="0,5 saniye" aria-pressed="false">0,5</button><button type="button" data-memory-gap="1" aria-label="1 saniye" aria-pressed="false">1</button><button type="button" data-memory-gap="1.5" aria-label="1,5 saniye" aria-pressed="true">1,5</button><button type="button" data-memory-gap="2" aria-label="2 saniye" aria-pressed="false">2</button><button type="button" data-memory-gap="3" aria-label="3 saniye" aria-pressed="false">3</button><button type="button" data-memory-gap="4" aria-label="4 saniye" aria-pressed="false">4</button><button type="button" data-memory-gap="5" aria-label="5 saniye" aria-pressed="false">5</button></fieldset>
+        <fieldset class="memory-repetitions"><legend>Sonraki ayete geçiş</legend><button type="button" data-memory-progression="auto" aria-pressed="true">Otomatik</button><button type="button" data-memory-progression="manual" aria-pressed="false">Manuel</button></fieldset>
         <fieldset id="memory-reciter" class="memory-repetitions"><legend>Hafız</legend><button type="button" data-memory-reciter="1" aria-pressed="true">Hafız 1</button></fieldset>
       </details>
       <p id="memory-availability" role="status" aria-live="polite" hidden></p>

@@ -2,14 +2,19 @@
 
 Çocuklar için deneysel dinleme ve ezber çalışması.
 
-- Ayetleri seçerek dinleme ve sürekli tekrar.
-- Tam, ayet ayet, orta adımlar ve kelime kelime çalışma.
+- Ayetleri seçerek dinleme ve sürekli tekrar. Üstteki numara düğmelerinden veya ayet yanındaki düğmelerden aynı dinleme seçimi değiştirilebilir.
+- Ezber ayetleri dinleme seçiminden bağımsızdır. Ezber ekranı her açıldığında tüm ayetler seçilir; eşit boyutlu, yalnızca numara gösteren düğmeler 7 sütunlu satırlara yerleşir. Başlığın sağındaki Hiçbirini seçme / Hepsini seç düğmesi toplu seçimi değiştirir; önündeki kare tüm ayetler seçiliyken dolu, diğer durumlarda boştur.
+- Tam, ayet ayet, orta adımlar ve kelime kelime çalışma. Kısa grup/adım seçimleri Arapça okuma yönüne göre sağdan sola dizilir; satırlar yukarıdan aşağıya devam eder. Ses ve adım sırası değişmez.
 - Hoca bir kez okur; öğrenci 1, 3, 5 veya 7 kez sessiz tekrar eder.
-- Ezber ekranındaki İnce ayarlar: tekrar sayısı (varsayılan 3), tekrar arası (1–5 saniye, varsayılan 3) ve mevcut kayıt için Hafız 1. Üçü de yan yana seçim düğmeleriyle gösterilir.
-- Tekrar sırasında görsel takip; hoca/öğrenci ikonları ve açıklama metinleri gösterilmez. Normal dinlemedeki hazırlık süresi de varsayılan 3 saniyedir.
+- Ezber ekranındaki İnce ayarlar: tekrar sayısı (varsayılan 3), tekrar arası (0,5; 1; 1,5; 2; 3; 4; 5 saniye, varsayılan 1,5), ayet/adım geçişi (Otomatik/Manuel, varsayılan Otomatik) ve Hafız 1. Hepsi yan yana seçim düğmeleriyle gösterilir. Saniye düğmeleri eşit boyutludur; birim yalnızca başlıktadır.
+- Tekrar sırasında görsel takip; hoca/öğrenci ikonları ve açıklama metinleri gösterilmez. Normal dinlemedeki hazırlık süresi de varsayılan 1,5 saniyedir.
+- Tekrar arası bekleme, kum saatinin yanında 160 px uzunluğunda ve tekrar sayaçları gibi 27 px yüksekliğinde, yuvarlatılmış sarı doluluk göstergesiyle gösterilir. Görünür saniye/sayı yazısı yoktur; doluluk seçilen süre boyunca kesintisiz azalır.
+- Tekrar başlamadan 0,1 saniye önce kırmızı ok ilk konumunda görünür ve başlangıca kadar sabit kalır. Bu görsel hazırlık mevcut beklemenin son 0,1 saniyesinde gerçekleşir; tekrarın başlangıcı, ses zamanları ve ilerleme hızı değişmez.
+- Ezber adımı etiketi ve tekrar sayacı aynı satırda gösterilir; etiket 16 px, sayaç rakamları 14 px boyutundadır.
+- Ezberden çıkış düğmesi sure başlığının yanındadır. Otomatik geçişte tekrarlar tamamlanınca seçili bekleme süresinin ardından sonraki ayet/adım başlar; son bölümde tur biter. Manuel geçişte oynatıcının en altındaki düğme tekrarlar bitene kadar gri ve basılamaz, tamamlanınca etkinleşir. Tam modunda bölüm geçişi yoktur.
 - Sağ üstteki görünüm ayarları: Türkçe okunuş, takip işareti ve kaynak/lisans bilgisi.
 - Alt açıklama ve footer gösterilmez; oynatma durumu yalnızca ekran okuyuculara duyurulur.
-- Ayet numaraları yalnızca yandaki seçim düğmelerinde gösterilir; Eûzü başlangıcı elif (ا) ile işaretlenir.
+- Ayet numaraları yalnızca yandaki seçim düğmelerinde gösterilir; düğmeler Arapça metin alanının altına hizalanır ve Türkçe okunuş alanına girmez. Eûzü başlangıcı ortası noktalı, sekiz yapraklı ayet süsüne benzeyen bir SVG simgesiyle işaretlenir.
 - Ayet alanları düz köşelidir; solda seçim çizgisi yoktur. Alanlar arasında ortalanmış, %90 genişliğinde ince bir alt çizgi bulunur; son alanın altında çizgi gösterilmez.
 - Arapça metin Açık Kuran’daki Shaikh Hamdullah Mushaf yazı tipiyle gösterilir: harfler ve noktaları siyah, harekeler ve şedde kırmızı, durak işaretleri mor. Metin ve ses eşleşme konumları değiştirilmez.
 
